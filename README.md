@@ -98,6 +98,13 @@ The PDF is written to `output/spain_wc2026_report.pdf`.
   in the report. The pipeline is data-source-agnostic: swap the CSVs for provider data
   (Opta, StatsBomb, FBref) and rebuild.
 
+## Designed cover
+
+If `assets/cover_page.pdf` exists (a cover designed outside the pipeline —
+Figma, InDesign, Canva…), the build stitches it in as page 1 with `pypdf`,
+auto-rotating a portrait canvas that holds landscape artwork, and skips the
+generated title page. Delete the file to fall back to the matplotlib cover.
+
 ## Plugging in real API data
 
 `scripts/fetch_api_football.py` pulls Spain's real WC26 fixtures and match

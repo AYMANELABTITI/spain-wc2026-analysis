@@ -2,6 +2,10 @@
 
 Usage:  python src/build_report.py
 Output: output/spain_wc2026_report.pdf
+
+If assets/cover_page.pdf exists (a designed cover, e.g. from Figma/InDesign),
+it replaces the generated title page: the matplotlib pages are rendered to a
+temporary body PDF and the cover is stitched in front with pypdf.
 """
 
 import matplotlib
@@ -11,8 +15,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.backends.backend_pdf import PdfPages
 
-from config import DATA_DIR, OUTPUT_DIR, apply_style
+from config import ASSETS_DIR, DATA_DIR, OUTPUT_DIR, apply_style
 from pages import PAGES
+
+COVER = ASSETS_DIR / "cover_page.pdf"
+TITLE = "Why Spain Won The 2026 World Cup — A Data Story"
+AUTHOR = "Aymane Labtiti"
 
 
 def load_data() -> dict[str, pd.DataFrame]:
@@ -34,23 +42,48 @@ def load_data() -> dict[str, pd.DataFrame]:
     }
 
 
+def render_pages(pages, data, path) -> None:
+    with PdfPages(path) as pdf:
+        for build in pages:
+            fig = build(data)
+            pdf.savefig(fig)
+            plt.close(fig)
+        meta = pdf.infodict()
+        meta["Title"] = TITLE
+        meta["Author"] = AUTHOR
+        meta["Subject"] = "Football analytics report generated with Python"
+
+
 def main() -> None:
     apply_style()
     data = load_data()
     OUTPUT_DIR.mkdir(exist_ok=True)
     out = OUTPUT_DIR / "spain_wc2026_report.pdf"
 
-    with PdfPages(out) as pdf:
-        for build in PAGES:
-            fig = build(data)
-            pdf.savefig(fig)
-            plt.close(fig)
-        meta = pdf.infodict()
-        meta["Title"] = "Why Spain Won The 2026 World Cup — A Data Story"
-        meta["Author"] = "Aymane Labtiti"
-        meta["Subject"] = "Football analytics report generated with Python"
+    if not COVER.exists():
+        render_pages(PAGES, data, out)
+        print(f"Report written to {out}")
+        return
 
-    print(f"Report written to {out}")
+    # designed cover replaces the generated title page
+    from pypdf import PdfReader, PdfWriter
+
+    body = OUTPUT_DIR / "_body.pdf"
+    render_pages(PAGES[1:], data, body)
+
+    writer = PdfWriter()
+    cover_page = PdfReader(COVER).pages[0]
+    if cover_page.mediabox.width < cover_page.mediabox.height:
+        cover_page.rotate(90)  # portrait canvas holding landscape artwork
+    writer.add_page(cover_page)
+    for page in PdfReader(body).pages:
+        writer.add_page(page)
+    writer.add_metadata({"/Title": TITLE, "/Author": AUTHOR,
+                         "/Subject": "Football analytics report generated with Python"})
+    with open(out, "wb") as fh:
+        writer.write(fh)
+    body.unlink()
+    print(f"Report written to {out} (designed cover + {len(PAGES) - 1} generated pages)")
 
 
 if __name__ == "__main__":
