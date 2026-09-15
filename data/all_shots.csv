@@ -1,0 +1,141 @@
+match_no,stage,opponent,minute,player,x,y,xg,is_goal,situation,shot_type
+1,Group C,Cape Verde,15,Pedri,83.3,45.1,0.037,0,RegularPlay,RightFoot
+1,Group C,Cape Verde,19,Fabián Ruiz,81.5,31.4,0.019,0,RegularPlay,LeftFoot
+1,Group C,Cape Verde,20,Pau Cubarsí,77.2,29.2,0.027,0,RegularPlay,RightFoot
+1,Group C,Cape Verde,29,Gavi,91.3,44.6,0.048,0,RegularPlay,RightFoot
+1,Group C,Cape Verde,29,Marc Cucurella,89.8,47.9,0.015,0,RegularPlay,RightFoot
+1,Group C,Cape Verde,39,Ferran Torres,100.3,33.3,0.304,0,RegularPlay,RightFoot
+1,Group C,Cape Verde,39,Mikel Oyarzabal,96.5,31.6,0.083,0,RegularPlay,Header
+1,Group C,Cape Verde,40,Ferran Torres,101.0,36.6,0.19,0,FromCorner,Header
+1,Group C,Cape Verde,41,Fabián Ruiz,79.7,37.2,0.01,0,FromCorner,LeftFoot
+1,Group C,Cape Verde,45,Ferran Torres,93.7,30.1,0.083,0,RegularPlay,LeftFoot
+1,Group C,Cape Verde,45,Aymeric Laporte,96.5,32.0,0.049,0,FromCorner,Header
+1,Group C,Cape Verde,45,Rodri,101.4,40.0,0.087,0,FromCorner,Header
+1,Group C,Cape Verde,45,Mikel Oyarzabal,99.9,37.7,0.147,0,RegularPlay,Header
+1,Group C,Cape Verde,48,Mikel Oyarzabal,96.0,34.7,0.088,0,RegularPlay,Header
+1,Group C,Cape Verde,48,Fabián Ruiz,79.2,18.4,0.019,0,RegularPlay,LeftFoot
+1,Group C,Cape Verde,51,Fabián Ruiz,86.7,24.3,0.075,0,RegularPlay,LeftFoot
+1,Group C,Cape Verde,56,Fabián Ruiz,96.3,34.4,0.191,0,RegularPlay,Header
+1,Group C,Cape Verde,58,Aymeric Laporte,77.3,42.1,0.026,0,RegularPlay,LeftFoot
+1,Group C,Cape Verde,73,Mikel Merino,94.8,33.9,0.105,0,RegularPlay,RightFoot
+1,Group C,Cape Verde,75,Ferran Torres,87.5,31.1,0.082,0,RegularPlay,RightFoot
+1,Group C,Cape Verde,78,Pedri,82.1,33.3,0.061,0,RegularPlay,RightFoot
+1,Group C,Cape Verde,82,Marc Cucurella,99.2,40.0,0.11,0,RegularPlay,Header
+1,Group C,Cape Verde,85,Rodri,83.9,43.9,0.022,0,RegularPlay,LeftFoot
+1,Group C,Cape Verde,88,Mikel Oyarzabal,92.4,32.7,0.089,0,RegularPlay,RightFoot
+1,Group C,Cape Verde,90,Lamine Yamal,83.3,17.8,0.018,0,RegularPlay,LeftFoot
+1,Group C,Cape Verde,90,Lamine Yamal,93.5,20.8,0.022,0,RegularPlay,LeftFoot
+1,Group C,Cape Verde,90,Mikel Oyarzabal,101.1,28.0,0.096,0,FromCorner,Header
+2,Group C,Saudi Arabia,2,Álex Baena,91.6,43.7,0.032,0,RegularPlay,RightFoot
+2,Group C,Saudi Arabia,4,Lamine Yamal,78.3,22.1,0.016,0,RegularPlay,LeftFoot
+2,Group C,Saudi Arabia,8,Dani Olmo,85.0,23.2,0.015,0,FromCorner,RightFoot
+2,Group C,Saudi Arabia,10,Pedro Porro,83.2,19.4,0.022,0,RegularPlay,RightFoot
+2,Group C,Saudi Arabia,10,Lamine Yamal,103.2,30.1,0.276,1,RegularPlay,RightFoot
+2,Group C,Saudi Arabia,13,Pedri,90.7,43.6,0.083,0,RegularPlay,LeftFoot
+2,Group C,Saudi Arabia,15,Álex Baena,85.9,52.9,0.018,0,RegularPlay,RightFoot
+2,Group C,Saudi Arabia,17,Mikel Oyarzabal,81.7,44.3,0.022,0,RegularPlay,RightFoot
+2,Group C,Saudi Arabia,21,Dani Olmo,92.8,24.0,0.038,0,FromCorner,RightFoot
+2,Group C,Saudi Arabia,21,Mikel Oyarzabal,100.1,38.6,0.188,1,FromCorner,LeftFoot
+2,Group C,Saudi Arabia,24,Mikel Oyarzabal,102.7,30.3,0.493,1,RegularPlay,LeftFoot
+2,Group C,Saudi Arabia,30,Lamine Yamal,86.7,21.4,0.02,0,RegularPlay,LeftFoot
+2,Group C,Saudi Arabia,36,Mikel Oyarzabal,98.1,55.0,0.056,0,RegularPlay,LeftFoot
+2,Group C,Saudi Arabia,36,Lamine Yamal,79.0,25.8,0.019,0,RegularPlay,LeftFoot
+2,Group C,Saudi Arabia,37,Lamine Yamal,88.9,22.0,0.022,0,RegularPlay,LeftFoot
+2,Group C,Saudi Arabia,42,Mikel Oyarzabal,95.6,44.3,0.043,0,RegularPlay,LeftFoot
+2,Group C,Saudi Arabia,45,Rodri,87.0,36.7,0.039,0,RegularPlay,LeftFoot
+2,Group C,Saudi Arabia,49,Marc Cucurella,101.2,28.6,0.184,0,FromCorner,LeftFoot
+2,Group C,Saudi Arabia,53,Pedro Porro,94.8,22.9,0.196,0,RegularPlay,RightFoot
+2,Group C,Saudi Arabia,53,Ferran Torres,92.9,28.0,0.037,0,RegularPlay,Header
+2,Group C,Saudi Arabia,65,Ferran Torres,92.5,43.4,0.441,0,RegularPlay,RightFoot
+2,Group C,Saudi Arabia,90,Mikel Merino,89.1,19.3,0.048,0,RegularPlay,LeftFoot
+3,Group C,Uruguay,17,Lamine Yamal,90.8,18.5,0.029,0,RegularPlay,LeftFoot
+3,Group C,Uruguay,20,Pau Cubarsí,100.7,29.8,0.124,0,FromCorner,Header
+3,Group C,Uruguay,42,Álex Baena,91.4,30.7,0.136,1,RegularPlay,RightFoot
+3,Group C,Uruguay,45,Mikel Oyarzabal,72.0,41.4,0.016,0,RegularPlay,LeftFoot
+3,Group C,Uruguay,63,Dani Olmo,92.0,31.1,0.171,0,RegularPlay,RightFoot
+3,Group C,Uruguay,86,Ferran Torres,89.8,34.8,0.382,0,RegularPlay,RightFoot
+4,Round of 32,Austria,1,Lamine Yamal,85.6,45.6,0.072,0,FastBreak,LeftFoot
+4,Round of 32,Austria,7,Dani Olmo,91.6,31.5,0.074,0,RegularPlay,RightFoot
+4,Round of 32,Austria,8,Aymeric Laporte,101.7,37.7,0.186,0,FromCorner,Header
+4,Round of 32,Austria,32,Lamine Yamal,104.3,21.3,0.012,0,RegularPlay,LeftFoot
+4,Round of 32,Austria,33,Mikel Oyarzabal,90.8,42.9,0.064,0,RegularPlay,LeftFoot
+4,Round of 32,Austria,36,Mikel Oyarzabal,94.7,37.2,0.178,1,RegularPlay,LeftFoot
+4,Round of 32,Austria,38,Lamine Yamal,83.0,31.6,0.048,0,RegularPlay,RightFoot
+4,Round of 32,Austria,39,Mikel Oyarzabal,91.5,30.2,0.14,0,RegularPlay,LeftFoot
+4,Round of 32,Austria,42,Aymeric Laporte,47.5,47.2,0.006,0,RegularPlay,LeftFoot
+4,Round of 32,Austria,45,Álex Baena,77.6,47.9,0.031,0,FreeKick,RightFoot
+4,Round of 32,Austria,45,Lamine Yamal,101.7,39.4,0.258,0,SetPiece,LeftFoot
+4,Round of 32,Austria,49,Mikel Oyarzabal,84.3,34.8,0.058,0,RegularPlay,LeftFoot
+4,Round of 32,Austria,52,Mikel Oyarzabal,96.2,32.7,0.061,0,FromCorner,Header
+4,Round of 32,Austria,54,Rodri,77.9,33.1,0.02,0,RegularPlay,RightFoot
+4,Round of 32,Austria,58,Álex Baena,77.3,43.6,0.017,0,RegularPlay,RightFoot
+4,Round of 32,Austria,59,Lamine Yamal,90.1,19.2,0.036,0,RegularPlay,LeftFoot
+4,Round of 32,Austria,62,Dani Olmo,89.1,25.0,0.061,0,RegularPlay,RightFoot
+4,Round of 32,Austria,66,Dani Olmo,83.5,44.0,0.02,0,RegularPlay,RightFoot
+4,Round of 32,Austria,66,Pedro Porro,98.1,35.1,0.527,1,RegularPlay,Header
+4,Round of 32,Austria,78,Ferran Torres,98.9,23.6,0.015,0,FromCorner,Header
+4,Round of 32,Austria,85,Lamine Yamal,96.5,36.0,0.293,0,RegularPlay,LeftFoot
+4,Round of 32,Austria,89,Mikel Oyarzabal,95.4,34.2,0.585,1,RegularPlay,RightFoot
+4,Round of 32,Austria,90,Ferran Torres,95.1,19.4,0.036,0,RegularPlay,RightFoot
+5,Round of 16,Portugal,3,Mikel Oyarzabal,80.5,42.5,0.037,0,RegularPlay,LeftFoot
+5,Round of 16,Portugal,8,Mikel Oyarzabal,91.6,39.9,0.614,0,FastBreak,LeftFoot
+5,Round of 16,Portugal,14,Álex Baena,84.4,48.2,0.022,0,RegularPlay,RightFoot
+5,Round of 16,Portugal,16,Lamine Yamal,91.9,21.7,0.058,0,FastBreak,LeftFoot
+5,Round of 16,Portugal,16,Álex Baena,91.3,46.3,0.067,0,FastBreak,RightFoot
+5,Round of 16,Portugal,23,Pedro Porro,76.2,33.9,0.011,0,SetPiece,RightFoot
+5,Round of 16,Portugal,31,Dani Olmo,96.9,29.5,0.055,0,FromCorner,Header
+5,Round of 16,Portugal,45,Rodri,76.4,27.9,0.023,0,RegularPlay,RightFoot
+5,Round of 16,Portugal,61,Pedri,86.2,34.8,0.062,0,RegularPlay,RightFoot
+5,Round of 16,Portugal,62,Lamine Yamal,81.0,41.7,0.015,0,FromCorner,LeftFoot
+5,Round of 16,Portugal,65,Álex Baena,89.0,43.4,0.083,0,RegularPlay,LeftFoot
+5,Round of 16,Portugal,73,Lamine Yamal,88.6,11.3,0.042,0,FreeKick,LeftFoot
+5,Round of 16,Portugal,77,Ferran Torres,103.9,21.3,0.008,0,RegularPlay,RightFoot
+5,Round of 16,Portugal,78,Dani Olmo,92.4,21.7,0.041,0,RegularPlay,RightFoot
+5,Round of 16,Portugal,90,Mikel Merino,93.4,38.5,0.55,1,RegularPlay,LeftFoot
+6,Quarter-final,Belgium,10,Rodri,94.5,30.8,0.129,0,SetPiece,RightFoot
+6,Quarter-final,Belgium,13,Álex Baena,92.2,28.6,0.104,0,RegularPlay,RightFoot
+6,Quarter-final,Belgium,21,Lamine Yamal,85.8,30.3,0.035,0,RegularPlay,LeftFoot
+6,Quarter-final,Belgium,30,Dani Olmo,92.8,29.1,0.218,0,RegularPlay,RightFoot
+6,Quarter-final,Belgium,30,Fabián Ruiz,98.3,36.1,0.447,1,RegularPlay,RightFoot
+6,Quarter-final,Belgium,35,Lamine Yamal,84.3,26.3,0.081,0,FreeKick,LeftFoot
+6,Quarter-final,Belgium,40,Lamine Yamal,91.4,20.1,0.02,0,RegularPlay,LeftFoot
+6,Quarter-final,Belgium,45,Pedro Porro,86.9,21.8,0.035,0,RegularPlay,LeftFoot
+6,Quarter-final,Belgium,45,Fabián Ruiz,90.5,28.1,0.026,0,FromCorner,LeftFoot
+6,Quarter-final,Belgium,52,Lamine Yamal,90.0,37.9,0.08,0,RegularPlay,LeftFoot
+6,Quarter-final,Belgium,53,Dani Olmo,85.5,41.5,0.03,0,FromCorner,RightFoot
+6,Quarter-final,Belgium,61,Lamine Yamal,86.5,17.8,0.019,0,RegularPlay,LeftFoot
+6,Quarter-final,Belgium,62,Mikel Oyarzabal,101.2,25.1,0.069,0,RegularPlay,RightFoot
+6,Quarter-final,Belgium,74,Lamine Yamal,91.6,17.6,0.017,0,RegularPlay,LeftFoot
+6,Quarter-final,Belgium,88,Pau Cubarsí,77.2,25.1,0.03,0,RegularPlay,RightFoot
+6,Quarter-final,Belgium,88,Mikel Merino,100.4,35.4,0.692,1,RegularPlay,LeftFoot
+6,Quarter-final,Belgium,90,Marc Cucurella,83.3,45.6,0.045,0,RegularPlay,LeftFoot
+7,Semi-final,France,11,Álex Baena,87.2,19.5,0.051,0,FreeKick,RightFoot
+7,Semi-final,France,22,Mikel Oyarzabal,94.0,34.0,0.788,1,Penalty,LeftFoot
+7,Semi-final,France,34,Dani Olmo,77.1,45.3,0.014,0,RegularPlay,RightFoot
+7,Semi-final,France,37,Pedro Porro,78.5,19.0,0.014,0,RegularPlay,RightFoot
+7,Semi-final,France,38,Fabián Ruiz,96.5,30.3,0.117,0,RegularPlay,LeftFoot
+7,Semi-final,France,52,Mikel Oyarzabal,83.5,47.6,0.02,0,RegularPlay,LeftFoot
+7,Semi-final,France,58,Álex Baena,86.1,51.0,0.019,0,RegularPlay,RightFoot
+7,Semi-final,France,58,Pedro Porro,94.3,29.0,0.522,1,RegularPlay,RightFoot
+7,Semi-final,France,78,Ferran Torres,95.9,35.4,0.062,0,RegularPlay,Header
+7,Semi-final,France,90,Nico Williams,100.7,48.3,0.026,0,RegularPlay,LeftFoot
+8,Final,Argentina,5,Lamine Yamal,98.9,21.7,0.1,0,RegularPlay,LeftFoot
+8,Final,Argentina,39,Mikel Oyarzabal,86.5,30.9,0.062,0,RegularPlay,LeftFoot
+8,Final,Argentina,43,Marc Cucurella,85.3,51.0,0.029,0,RegularPlay,LeftFoot
+8,Final,Argentina,46,Álex Baena,85.3,41.2,0.077,0,RegularPlay,RightFoot
+8,Final,Argentina,61,Lamine Yamal,81.2,17.6,0.035,0,FreeKick,LeftFoot
+8,Final,Argentina,64,Dani Olmo,80.5,32.4,0.046,0,RegularPlay,RightFoot
+8,Final,Argentina,65,Dani Olmo,100.1,31.4,0.142,0,FromCorner,Header
+8,Final,Argentina,67,Ferran Torres,97.3,30.3,0.264,0,FromCorner,Header
+8,Final,Argentina,77,Pedri,87.2,36.7,0.045,0,RegularPlay,LeftFoot
+8,Final,Argentina,77,Pau Cubarsí,83.6,18.7,0.029,0,IndividualPlay,RightFoot
+8,Final,Argentina,81,Aymeric Laporte,98.6,37.7,0.093,0,FromCorner,Header
+8,Final,Argentina,87,Ferran Torres,93.8,26.8,0.16,0,RegularPlay,RightFoot
+8,Final,Argentina,89,Rodri,76.1,30.3,0.034,0,RegularPlay,RightFoot
+8,Final,Argentina,90,Nico Williams,89.7,19.7,0.055,0,FastBreak,RightFoot
+8,Final,Argentina,90,Lamine Yamal,80.8,36.3,0.075,0,FreeKick,LeftFoot
+8,Final,Argentina,93,Nico Williams,97.8,34.8,0.476,0,RegularPlay,Header
+8,Final,Argentina,101,Lamine Yamal,83.2,21.7,0.017,0,RegularPlay,LeftFoot
+8,Final,Argentina,103,Mikel Merino,97.9,34.5,0.255,0,RegularPlay,Header
+8,Final,Argentina,104,Nico Williams,78.3,38.6,0.035,0,RegularPlay,RightFoot
+8,Final,Argentina,106,Ferran Torres,96.6,38.1,0.255,1,RegularPlay,LeftFoot

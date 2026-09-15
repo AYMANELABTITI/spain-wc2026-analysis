@@ -99,7 +99,7 @@ def xg_vs_goals(ax: Axes, matches: pd.DataFrame) -> None:
     x = matches.match_no
     w = 0.38
     ax.bar(x - w / 2, matches.xg_for, width=w, color=LIGHT_GREY,
-           edgecolor=GREY, lw=0.6, label="xG created (FotMob)")
+           edgecolor=GREY, lw=0.6, label="xG created")
     ax.bar(x + w / 2, matches.gf, width=w, color=SPAIN_RED, label="Goals")
     ax.set_xticks(x)
     ax.set_xticklabels([STAGE_SHORT[s] for s in matches.stage], fontsize=7.5)
@@ -182,8 +182,8 @@ def final_dominance(ax: Axes) -> None:
 
 # ------------------------------------------------------------------ page 5
 def radar_identity(ax: Axes, matches: pd.DataFrame, teams: pd.DataFrame) -> None:
-    """Team identity radar: Spain vs the average of its beaten rivals."""
-    rivals = teams[teams.team != "Spain"]
+    """Team identity radar: Spain vs the average of the other deep runners."""
+    rivals = teams[~teams.team.isin(["Spain", "England"])]   # sides Spain beat
     axes_labels = ["Attack\n(goals/gm)", "Chance\ncreation", "Possession",
                    "Defence\n(inv. GA/gm)", "Efficiency\n(G/xG)"]
 
@@ -258,7 +258,7 @@ def formation_pitch(ax: Axes) -> None:
 
 
 def minutes_bars(ax: Axes, players: pd.DataFrame) -> None:
-    """Squad usage: minutes played (est.), starters of the Final highlighted."""
+    """Squad usage: real minutes played, Final starters highlighted."""
     p = players.sort_values("minutes").reset_index(drop=True)
     colors = [SPAIN_RED if s else LIGHT_GREY for s in p.starter_final]
     edges = ["none" if s else GREY for s in p.starter_final]
@@ -287,72 +287,84 @@ def contribution_scatter(ax: Axes, players: pd.DataFrame) -> None:
             ax.annotate(r.player, (r.minutes, r.gi90), xytext=(0, 8),
                         textcoords="offset points", ha="center", fontsize=7.2,
                         fontweight="bold" if big else "normal", color=NAVY)
-    ax.set_xlabel("Minutes played (est.)", fontsize=8.5)
+    ax.set_xlabel("Minutes played", fontsize=8.5)
     ax.set_ylabel("Goals + assists per 90", fontsize=8.5)
     ax.grid(color=LIGHT_GREY, lw=0.8)
     ax.set_ylim(-0.06, 1.2)
 
 
 # ------------------------------------------------------------------ structure
-def pass_network(ax: Axes, edges: pd.DataFrame) -> None:
-    """Passing network of the Final XI: edge width = combination volume,
-    node size = total pass involvement."""
-    _pitch_100(ax, face="#F1F4F8")
-    involvement = {}
-    for _, e in edges.iterrows():
-        for p in (e.p1, e.p2):
-            involvement[p] = involvement.get(p, 0) + e.passes
-    for _, e in edges.iterrows():
-        (x1, y1), (x2, y2) = FINAL_XI[e.p1], FINAL_XI[e.p2]
-        ax.plot([x1, x2], [y1, y2], color=SPAIN_RED,
-                lw=0.25 + e.passes / 11, alpha=0.30 + 0.5 * e.passes / 62,
-                zorder=2, solid_capstyle="round")
-    top = max(involvement.values())
-    for name, (x, y) in FINAL_XI.items():
-        inv = involvement.get(name, 0)
-        ax.scatter(x, y, s=120 + 340 * inv / top,
-                   color=NAVY if inv < 0.75 * top else SPAIN_RED,
-                   edgecolor=WHITE, lw=1.4, zorder=3)
-        ax.text(x, y - 7.2, name, ha="center", fontsize=6.8, fontweight="bold",
-                color=NAVY, zorder=3)
+LABEL_NUDGE = {   # keep the congested central cluster readable
+    "Rodri": (-19, -4), "Pedri": (0, 13), "Fabián Ruiz": (-20, 6),
+    "Dani Olmo": (16, 8), "Mikel Oyarzabal": (19, -5),
+    "Pau Cubarsí": (0, 13), "Aymeric Laporte": (0, -13),
+    "Marc Cucurella": (0, -13), "Pedro Porro": (0, 13),
+    "Lamine Yamal": (0, 13), "Álex Baena": (0, -13), "Unai Simón": (0, 13),
+}
 
 
-def team_lines(ax: Axes, lines: pd.DataFrame) -> None:
-    """Average height of the defensive and midfield lines vs tournament norm."""
+def average_positions(ax: Axes, pos: pd.DataFrame, min_touches: int = 250) -> None:
+    """REAL team shape: each player's mean touch location across the
+    tournament, node area proportional to their real touch count."""
+    p = pos[pos.touches >= min_touches].copy()
     draw_pitch_h(ax, face="#F1F4F8")
-    d, m = lines.def_line.mean(), lines.mid_line.mean()
-    for x, c, lbl, ha in [(d, WC_GREEN, f"defensive line {d:.0f} m ", "right"),
-                          (m, SPAIN_RED, f" midfield line {m:.0f} m", "left")]:
-        ax.plot([x, x], [1, 67], color=c, lw=2.6, zorder=5)
-        ax.text(x, 70.5, lbl, ha=ha, fontsize=7.4, color=c, fontweight="bold")
-    for x, lbl, ha in [(34, "avg 34 m ", "right"), (48, " avg 48 m", "left")]:
-        ax.plot([x, x], [1, 67], color=GREY, lw=1.2, ls="--", zorder=5)
-        ax.text(x, -5.5, lbl, ha=ha, fontsize=6.6, color=GREY)
-    ax.text(41, -12, "tournament averages (est.)", ha="center", fontsize=6.2,
-            color=GREY)
-    ax.annotate("", xy=(d, 8), xytext=(34, 8),
-                arrowprops=dict(arrowstyle="->", color=WC_GREEN, lw=1.4))
-    ax.text((d + 34) / 2, 11, "+7 m", ha="center", fontsize=7.4,
-            color=WC_GREEN, fontweight="bold")
-    ax.set_ylim(-15, 76)
+    top = p.touches.max()
+    for _, r in p.iterrows():
+        lead = r.touches > 0.55 * top
+        ax.scatter(r.x, r.y, s=110 + 700 * r.touches / top,
+                   color=SPAIN_RED if lead else NAVY, edgecolor=WHITE,
+                   lw=1.3, zorder=5, alpha=0.93)
+        ax.annotate(f"{int(r.touches)}", (r.x, r.y), ha="center", va="center",
+                    fontsize=5.4, color=WHITE, fontweight="bold", zorder=6)
+        dx, dy = LABEL_NUDGE.get(r.player, (0, 11))
+        ax.annotate(r.player.split()[-1], (r.x, r.y), xytext=(dx, dy),
+                    textcoords="offset points", ha="center", va="center",
+                    fontsize=6.2, color=NAVY, fontweight="bold", zorder=7)
+    ax.annotate("", xy=(96, -4), xytext=(58, -4), annotation_clip=False,
+                arrowprops=dict(arrowstyle="->", color=GREY, lw=1))
+    ax.text(56, -4, "attacking direction", fontsize=6.4, color=GREY,
+            ha="right", va="center")
+    ax.set_ylim(-9, 70)
 
 
-def def_line_trend(ax: Axes, lines: pd.DataFrame) -> None:
-    """Defensive line height per match — discipline against the elite."""
-    ax.plot(lines.match_no, lines.def_line, color=WC_GREEN, lw=2.2,
-            marker="o", ms=5)
-    ax.axhline(34, color=GREY, lw=1, ls="--")
-    ax.text(1.0, 34.6, "tournament avg", fontsize=6.8, color=GREY)
-    for m in (7, 8):  # France, Argentina
-        row = lines[lines.match_no == m].iloc[0]
-        ax.annotate(row.stage, (m, row.def_line), xytext=(0, -13),
-                    textcoords="offset points", ha="center", fontsize=6.8,
-                    color=NAVY)
-    ax.set_xticks(lines.match_no)
-    ax.set_xticklabels(lines.stage, fontsize=6.6)
-    ax.set_ylim(30, 48)
-    ax.set_ylabel("Def. line height (m, est.)", fontsize=7.6)
-    ax.grid(axis="y", color=LIGHT_GREY, lw=0.8)
+def attacking_zones_chart(ax: Axes, zones: pd.DataFrame) -> None:
+    """REAL share of attacks down the left, through the centre, and right."""
+    x = zones.match_no
+    ax.bar(x, zones.left, color=SPAIN_RED, width=0.66, label="Left")
+    ax.bar(x, zones.center, bottom=zones.left, color=LIGHT_GREY,
+           edgecolor=GREY, lw=0.5, width=0.66, label="Centre")
+    ax.bar(x, zones.right, bottom=zones.left + zones.center, color=NAVY,
+           width=0.66, label="Right")
+    for xi, l, c, r in zip(x, zones.left, zones.center, zones.right):
+        ax.text(xi, l / 2, f"{l}", ha="center", va="center", fontsize=6.4,
+                color=WHITE, fontweight="bold")
+        ax.text(xi, l + c / 2, f"{c}", ha="center", va="center", fontsize=6.4,
+                color=DARK)
+        ax.text(xi, l + c + r / 2, f"{r}", ha="center", va="center",
+                fontsize=6.4, color=WHITE, fontweight="bold")
+    ax.set_xticks(x)
+    ax.set_xticklabels([STAGE_SHORT[s] for s in zones.stage], fontsize=7)
+    ax.set_ylim(0, 100)
+    ax.set_ylabel("Share of attacks (%)", fontsize=8)
+    ax.legend(frameon=False, fontsize=7.5, ncol=3, loc="upper center",
+              bbox_to_anchor=(0.5, 1.14))
+
+
+def territory_chart(ax: Axes, matches: pd.DataFrame) -> None:
+    """REAL territorial dominance: share of Spain's passes played in the
+    opposition half, match by match."""
+    share = 100 * matches.passes_opp_half / (matches.passes_opp_half
+                                             + matches.passes_own_half)
+    colors = [GOLD if s == "Final" else SPAIN_RED for s in matches.stage]
+    ax.bar(matches.match_no, share, color=colors, width=0.62)
+    ax.axhline(50, color=DARK, lw=1, ls="--")
+    ax.text(0.6, 44, "half the pitch", fontsize=6.6, color=DARK)
+    for xi, v in zip(matches.match_no, share):
+        ax.text(xi, v + 1.4, f"{v:.0f}", ha="center", fontsize=7, color=GREY)
+    ax.set_xticks(matches.match_no)
+    ax.set_xticklabels([STAGE_SHORT[s] for s in matches.stage], fontsize=7)
+    ax.set_ylim(0, 92)
+    ax.set_ylabel("Passes in opposition half (%)", fontsize=8)
 
 
 def donut(ax: Axes, labels: list[str], values: list[float], colors: list[str],
@@ -373,66 +385,141 @@ def donut(ax: Axes, labels: list[str], values: list[float], colors: list[str],
 
 
 # ------------------------------------------------------------------ pressing
-def pressing_heatmap(ax: Axes, zones: pd.DataFrame) -> None:
-    """Zonal map of defensive actions (pressures + recoveries), est."""
-    grid = zones.pivot(index="y_bin", columns="x_bin", values="actions").values
-    cmap = LinearSegmentedColormap.from_list("press", ["#F5F0EE", SPAIN_RED])
-    xe = np.linspace(0, 105, grid.shape[1] + 1)
-    ye = np.linspace(0, 68, grid.shape[0] + 1)
-    ax.pcolormesh(xe, ye, grid, cmap=cmap, alpha=0.92, zorder=1,
-                  edgecolors=WHITE, lw=1.2)
-    for i in range(grid.shape[0]):
-        for j in range(grid.shape[1]):
-            frac = grid[i, j] / grid.max()
-            ax.text((xe[j] + xe[j + 1]) / 2, (ye[i] + ye[i + 1]) / 2,
-                    f"{grid[i, j]}", ha="center", va="center", fontsize=6.6,
-                    color=WHITE if frac > 0.55 else GREY, zorder=5,
-                    fontweight="bold" if frac > 0.55 else "normal")
-    draw_pitch_h(ax, line_color=NAVY)
-    ax.annotate("attacking direction", xy=(76, -6.5), xytext=(30, -6.5),
-                fontsize=6.8, color=GREY, annotation_clip=False,
-                arrowprops=dict(arrowstyle="->", color=GREY, lw=1))
-    ax.set_ylim(-10, 70)
-
-
-def high_regains_map(ax: Axes, regains: pd.DataFrame) -> None:
-    """Where Spain won the ball back high — and what happened next."""
-    draw_pitch_h(ax, face="#F1F4F8")
-    ax.plot([65, 65], [0, 68], color=GOLD, lw=1.4, ls="--", zorder=5)
-    ax.text(65, 70.5, "last 40 m", ha="center", fontsize=7, color=GOLD,
-            fontweight="bold")
-    styles = {"regain": dict(s=26, facecolor=WHITE, edgecolor=GREY, lw=0.9),
-              "shot": dict(s=48, facecolor=NAVY, edgecolor=WHITE, lw=0.8),
-              "goal": dict(s=85, facecolor=SPAIN_RED, edgecolor=WHITE, lw=1.2)}
-    for kind, st in styles.items():
-        sub = regains[regains.outcome == kind]
-        ax.scatter(sub.x, sub.y, zorder=6, **st)
-    for i, (kind, lbl) in enumerate([("regain", "high regain"),
-                                     ("shot", "shot within 15 s"),
-                                     ("goal", "goal within 15 s")]):
-        st = styles[kind]
-        ax.scatter(4 + i * 38, -6.5, zorder=6, clip_on=False, **st)
-        ax.text(7.5 + i * 38, -6.5, lbl, fontsize=6.8, color=DARK, va="center")
-    ax.set_ylim(-10, 74)
-
-
-def ppda_bars(ax: Axes, teams: pd.DataFrame) -> None:
-    """PPDA (passes allowed per defensive action) — lower = fiercer press."""
-    t = teams.sort_values("ppda", ascending=False).reset_index(drop=True)
+def poss_won_ranking(ax: Axes, league: pd.DataFrame, top_n: int = 12) -> None:
+    """REAL tournament ranking: possessions won in the attacking third per
+    match. Spain finished first of the 32 ranked teams."""
+    t = (league.dropna(subset=["poss_won_final_third"])
+               .sort_values("poss_won_final_third", ascending=False)
+               .head(top_n).iloc[::-1].reset_index(drop=True))
     colors = [SPAIN_RED if n == "Spain" else LIGHT_GREY for n in t.team]
-    ax.barh(t.team, t.ppda, color=colors, height=0.6,
+    ax.barh(t.team, t.poss_won_final_third, color=colors, height=0.66,
             edgecolor=[GREY if c == LIGHT_GREY else "none" for c in colors],
             lw=0.6)
     for i, row in t.iterrows():
-        ax.text(row.ppda + 0.15, i, f"{row.ppda}", va="center", fontsize=7.6,
-                color=NAVY if row.team == "Spain" else GREY,
-                fontweight="bold" if row.team == "Spain" else "normal")
-    ax.set_xlim(0, t.ppda.max() + 2.2)
-    ax.tick_params(axis="y", labelsize=7.6)
-    ax.set_xlabel("PPDA (est.) — lower = more intense press", fontsize=7.6)
+        spain = row.team == "Spain"
+        ax.text(row.poss_won_final_third + 0.08, i,
+                f"{row.poss_won_final_third:.1f}" + ("  ← 1st of 32" if spain else ""),
+                va="center", fontsize=7.4,
+                color=SPAIN_RED if spain else GREY,
+                fontweight="bold" if spain else "normal")
+    ax.set_xlim(0, t.poss_won_final_third.max() + 1.9)
+    ax.tick_params(axis="y", labelsize=7.4)
+    ax.set_xticks([0, 2, 4, 6])
+
+
+def ppda_per_match(ax: Axes, matches: pd.DataFrame) -> None:
+    """REAL PPDA computed from FotMob counts: opponent passes divided by
+    Spain's tackles + interceptions. Lower = more intense pressing."""
+    ppda = matches.opp_passes / (matches.tackles + matches.interceptions)
+    ax.plot(matches.match_no, ppda, color=SPAIN_RED, lw=2.2, marker="o", ms=5)
+    mean = ppda.mean()
+    ax.axhline(mean, color=DARK, lw=1, ls="--")
+    ax.text(0.7, mean + 0.7, f"avg {mean:.1f}", fontsize=7, color=DARK)
+    for xi, v, opp in zip(matches.match_no, ppda, matches.opponent):
+        if v == ppda.min():
+            ax.annotate(f"{opp} {v:.1f}\nfiercest press", (xi, v),
+                        xytext=(0, -22), textcoords="offset points",
+                        ha="center", fontsize=6.6, color=SPAIN_RED,
+                        linespacing=1.2, fontweight="bold")
+        elif v == ppda.max():
+            ax.annotate(f"{opp} {v:.1f}\nsat deepest", (xi, v), xytext=(0, 9),
+                        textcoords="offset points", ha="center", fontsize=6.6,
+                        color=NAVY, linespacing=1.2)
+    ax.set_xticks(matches.match_no)
+    ax.set_xticklabels([STAGE_SHORT[s] for s in matches.stage], fontsize=7)
+    ax.set_ylim(0, ppda.max() * 1.35)
+    ax.set_ylabel("Opponent passes per Spain tackle/interception", fontsize=7.4)
+    ax.grid(axis="y", color=LIGHT_GREY, lw=0.8)
+
+
+def touches_box_chart(ax: Axes, matches: pd.DataFrame) -> None:
+    """REAL touches in the opposition box, with big chances overlaid."""
+    x = matches.match_no
+    colors = [GOLD if s == "Final" else SPAIN_RED for s in matches.stage]
+    ax.bar(x, matches.touches_opp_box, color=colors, width=0.62,
+           label="Touches in opposition box")
+    for xi, v in zip(x, matches.touches_opp_box):
+        ax.text(xi, v + 1.4, f"{v}", ha="center", fontsize=7, color=GREY)
+    ax2 = ax.twinx()
+    ax2.plot(x, matches.big_chances, color=NAVY, lw=1.8, marker="o", ms=4.5,
+             label="Big chances")
+    ax2.set_ylim(0, 9)
+    ax2.set_ylabel("Big chances", fontsize=7.6, color=NAVY)
+    ax2.tick_params(axis="y", labelsize=7, colors=NAVY)
+    ax2.spines["right"].set_visible(True)
+    ax2.spines["right"].set_color(NAVY)
+    ax.set_xticks(x)
+    ax.set_xticklabels([STAGE_SHORT[s] for s in matches.stage], fontsize=7)
+    ax.set_ylim(0, 62)
+    ax.set_ylabel("Touches in opposition box", fontsize=7.6)
+
+
+def momentum_chart(ax: Axes, mom: pd.DataFrame) -> None:
+    """REAL FotMob momentum for the Final: who was on top, minute by minute."""
+    pos = mom.value.clip(lower=0)
+    neg = mom.value.clip(upper=0)
+    ax.fill_between(mom.minute, pos, color=SPAIN_RED, step="mid", alpha=0.9)
+    ax.fill_between(mom.minute, neg, color=GREY, step="mid", alpha=0.85)
+    ax.axhline(0, color=DARK, lw=0.8)
+    ax.axvline(90, color=NAVY, lw=1, ls=":")
+    ax.text(89, 88, "90'", fontsize=6.6, color=NAVY, ha="right")
+    ax.axvline(106, color=GOLD, lw=1.3, ls="--")
+    ax.annotate("Torres 106'", (106, 70), xytext=(-4, 0),
+                textcoords="offset points", fontsize=7, color="#9A7B14",
+                fontweight="bold", ha="right")
+    ax.text(3, 82, "SPAIN on top", fontsize=7, color=SPAIN_RED,
+            fontweight="bold")
+    ax.text(3, -95, "ARGENTINA on top", fontsize=7, color=GREY,
+            fontweight="bold")
+    ax.set_xlim(0, 126)
+    ax.set_ylim(-110, 110)
+    ax.set_yticks([])
+    ax.set_xticks([0, 15, 30, 45, 60, 75, 90, 105, 120])
+    ax.set_xlabel("Minute", fontsize=8)
+    ax.spines["left"].set_visible(False)
 
 
 # ------------------------------------------------------------------ goal DNA
+def goals_map(ax: Axes, shots: pd.DataFrame, from_x: float = 52.5) -> None:
+    """REAL map of every Spain shot on a vertical attacking half: the pitch is
+    transposed (pitch y -> screen x, pitch x -> screen y) so the goal is at the
+    top, the convention for shot maps."""
+    ax.add_patch(Rectangle((0, from_x), 68, 105 - from_x, facecolor="#F1F4F8",
+                           edgecolor=GREY, lw=1, zorder=1))
+    ax.add_patch(Rectangle((13.85, 105 - 16.5), 40.3, 16.5, fill=False,
+                           edgecolor=GREY, lw=0.8, zorder=2))
+    ax.add_patch(Rectangle((24.85, 105 - 5.5), 18.3, 5.5, fill=False,
+                           edgecolor=GREY, lw=0.8, zorder=2))
+    ax.plot([30.3, 37.7], [105, 105], color=NAVY, lw=2.4, zorder=3)
+
+    misses = shots[shots.is_goal == 0]
+    ax.scatter(misses.y, misses.x, s=16 + 240 * misses.xg, facecolor="none",
+               edgecolor=GREY, lw=0.8, alpha=0.6, zorder=4)
+    goals = shots[shots.is_goal == 1]
+    ax.scatter(goals.y, goals.x, s=36 + 400 * goals.xg, color=SPAIN_RED,
+               edgecolor=WHITE, lw=1.1, zorder=6)
+    open_play = goals[goals.situation != "Penalty"]
+    if len(open_play):
+        best = open_play.nlargest(1, "xg").iloc[0]
+        ax.annotate(f"best open-play chance: {best.player.split()[-1]} "
+                    f"{best.xg:.2f} xG", (best.y, best.x), xytext=(-2, -30),
+                    textcoords="offset points", ha="center", fontsize=6.2,
+                    color=NAVY, fontweight="bold",
+                    arrowprops=dict(arrowstyle="-", color=NAVY, lw=0.6))
+    ax.set_xlim(-1, 69)
+    ax.set_ylim(from_x - 9, 110)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    ax.text(34, 107.5, f"{len(shots)} shots  ·  {len(goals)} goals  ·  "
+            f"{shots.xg.sum():.1f} xG", ha="center", fontsize=7.2,
+            color=DARK, fontweight="bold")
+    ax.scatter(6, from_x - 5, s=55, facecolor="none", edgecolor=GREY, lw=0.8)
+    ax.text(9.5, from_x - 5, "shot", fontsize=6.4, color=GREY, va="center")
+    ax.scatter(24, from_x - 5, s=85, color=SPAIN_RED, edgecolor=WHITE, lw=1)
+    ax.text(27.5, from_x - 5, "goal  ·  size = xG", fontsize=6.4, color=GREY,
+            va="center")
+
+
 def goal_chain(ax: Axes, chain: pd.DataFrame) -> None:
     """One goal's build-up on a mini pitch: numbered nodes, pass/dribble
     links, red arrow for the strike (illustrative reconstruction)."""
@@ -477,9 +564,8 @@ def _gauss_blur(grid: np.ndarray, sigma: float) -> np.ndarray:
 
 
 def player_heatmap(ax: Axes, touches: pd.DataFrame) -> None:
-    """Sofascore-style heatmap COMPUTED from touch-event points: the points
-    are binned into a 2D histogram, then kernel-smoothed. No hand-drawn blobs.
-    """
+    """Heatmap computed from REAL touch coordinates (FotMob match heatmaps):
+    points binned into a 2D histogram, then kernel-smoothed."""
     grid, _, _ = np.histogram2d(touches.y, touches.x, bins=[34, 52],
                                 range=[[0, 68], [0, 105]])
     dens = _gauss_blur(grid, sigma=1.6)
@@ -832,7 +918,7 @@ def age_minutes(ax: Axes, players: pd.DataFrame) -> None:
     ax.text(21, 90, "the new wave", fontsize=7, color="#9A7B14",
             ha="center", fontweight="bold")
     ax.set_xlabel("Age at the Final", fontsize=8)
-    ax.set_ylabel("Minutes (est.)", fontsize=8)
+    ax.set_ylabel("Minutes played", fontsize=8)
     ax.grid(color=LIGHT_GREY, lw=0.8)
     ax.set_xlim(17.5, 33.5)
     ax.set_ylim(0, 830)
@@ -922,18 +1008,21 @@ def butterfly(ax: Axes, metrics: list[tuple[str, float, float, str, str, int]]) 
 
 
 def profile_panel(ax: Axes, prof: pd.DataFrame, accent: str) -> None:
-    """One player's card: 3 percentile bars vs tournament peers (est.)."""
+    """One player's card: three REAL metrics, each bar showing the player's
+    true percentile against WC26 peers in the same position group."""
     rows = prof.reset_index(drop=True)
     n = len(rows)
     for i, r in rows.iterrows():
         y = n - 1 - i
         ax.barh(y, 100, color=LIGHT_GREY, height=0.34, zorder=1)
         ax.barh(y, r.percentile, color=accent, height=0.34, zorder=2)
-        ax.text(0, y + 0.42, r.metric, fontsize=7.6, color=DARK, va="center")
-        ax.text(100, y + 0.42, r.value_label, fontsize=7.4, color=GREY,
-                va="center", ha="right")
-        ax.text(r.percentile - 2, y, f"{r.percentile}", fontsize=6.6,
-                color=WHITE, va="center", ha="right", fontweight="bold", zorder=3)
+        ax.text(0, y + 0.42, r.metric, fontsize=7.4, color=DARK, va="center")
+        ax.text(100, y + 0.42, r.value_label, fontsize=7.4, color=NAVY,
+                va="center", ha="right", fontweight="bold")
+        inside = r.percentile > 16
+        ax.text(r.percentile + (-2 if inside else 2), y, f"{r.percentile}",
+                fontsize=6.6, color=WHITE if inside else GREY, va="center",
+                ha="right" if inside else "left", fontweight="bold", zorder=3)
     ax.set_xlim(0, 100)
     ax.set_ylim(-0.55, n - 0.1)
     ax.axis("off")

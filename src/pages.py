@@ -197,7 +197,7 @@ def road_page(d: dict) -> Figure:
     _chart_title(fig, 0.84, 0.855, [("Best ", False), ("attack–defence balance", True),
                                     (" of the deep runners", False)], fontsize=9.5)
     charts.goal_diff_scatter(ax3, t)
-    _source(fig, 0.815, 0.392, "Source compiled data :", " per-match rates, Spain + beaten rivals")
+    _source(fig, 0.815, 0.392, "Source FotMob :", " per-match rates, Spain + the other deep runners")
 
     _commentary(fig, 0.375, 0.365,
         "Spain's route was anything but soft: Uruguay in the group, then Portugal, Belgium, "
@@ -209,7 +209,7 @@ def road_page(d: dict) -> Figure:
         "Spain is alone in the top-right quadrant of the balance: 1.75 goals per game scored with just "
         "0.13 conceded. Argentina and France matched the attacking rate — nobody came close to combining "
         "it with Spain's defensive record of a single goal in 750+ minutes.", width=108)
-    _footer(fig, "Scores & scorers: FIFA / ESPN / Striker Report  ·  xG and possession are estimates compiled from public match reports")
+    _footer(fig, "Results & scorers: FotMob match events  ·  all match metrics: FotMob (Opta-sourced), cached in data/fotmob/")
     return fig
 
 
@@ -233,7 +233,7 @@ def possession_page(d: dict) -> Figure:
     ax3 = fig.add_axes([0.73, 0.42, 0.24, 0.40])
     _chart_title(fig, 0.85, 0.855, [("11 players", True), (" with a goal or assist", False)])
     charts.scorer_spread(ax3, p)
-    _source(fig, 0.85, 0.375, "Source FIFA :", " goal involvements (assists est.)")
+    _source(fig, 0.85, 0.375, "Source FotMob :", " goals + assists per player")
 
     _commentary(fig, 0.05, 0.33,
         "Spain suffocated opponents with the ball before beating them with it. Possession never dipped "
@@ -290,78 +290,85 @@ def defence_page(d: dict) -> Figure:
 
 
 def structure_page(d: dict) -> Figure:
+    m = d["matches"]
     fig = _new_page()
-    _header(fig, "In Possession : Structure, Networks & The High Block", active=1)
+    _header(fig, "In Possession : Team Shape & Where The Threat Came From",
+            active=1)
 
-    ax1 = fig.add_axes([0.035, 0.12, 0.27, 0.70])
-    _chart_title(fig, 0.17, 0.855, [("Passing network ", True), ("— everything through Rodri", False)],
-                 fontsize=9.6)
-    charts.pass_network(ax1, d["network"])
-    _source(fig, 0.17, 0.095, "Source compiled data :", " Final XI combinations (est.), node = involvement")
+    ax1 = fig.add_axes([0.035, 0.30, 0.31, 0.52])
+    _chart_title(fig, 0.19, 0.855, [("Average touch positions ", True),
+                                    ("— Rodri is the hub", False)], fontsize=9.6)
+    charts.average_positions(ax1, d["positions"])
+    _source(fig, 0.19, 0.285, "Source FotMob :", " 7,724 real touches; node size = touch volume")
 
-    ax2 = fig.add_axes([0.345, 0.30, 0.30, 0.52])
-    _chart_title(fig, 0.50, 0.855, [("A block living ", False), ("7 m higher", True),
-                                    (" than the tournament", False)], fontsize=9.6)
-    charts.team_lines(ax2, d["lines"])
-    _source(fig, 0.50, 0.285, "Source compiled data :", " avg line heights from own goal (est.)")
+    ax2 = fig.add_axes([0.40, 0.46, 0.26, 0.33])
+    _chart_title(fig, 0.53, 0.855, [("Both flanks, ", True), ("rarely the middle", False)])
+    charts.attacking_zones_chart(ax2, d["zones"])
+    _source(fig, 0.53, 0.425, "Source FotMob :", " attack distribution per match")
 
-    ax3 = fig.add_axes([0.71, 0.52, 0.26, 0.30])
-    _chart_title(fig, 0.84, 0.855, [("Line discipline ", True), ("match by match", False)])
-    charts.def_line_trend(ax3, d["lines"])
-    _source(fig, 0.84, 0.455, "Source compiled data :", " def. line height per match (est.)")
+    ax3 = fig.add_axes([0.715, 0.46, 0.25, 0.33])
+    _chart_title(fig, 0.84, 0.855, [("The game played ", False),
+                                    ("in their half", True)])
+    charts.territory_chart(ax3, m)
+    _source(fig, 0.84, 0.425, "Source FotMob :", " passes in the opposition half")
 
-    ax4 = fig.add_axes([0.725, 0.115, 0.115, 0.27])
+    ax4 = fig.add_axes([0.735, 0.10, 0.115, 0.27])
     charts.donut(ax4, list(d["goal_types"].type), list(d["goal_types"]["count"]),
                  [SPAIN_RED, GOLD, NAVY, "#4A6FA5", GREY], "14", "goals")
-    _chart_title(fig, 0.845, 0.415, [("How the goals came", True)], fontsize=9)
+    _chart_title(fig, 0.855, 0.385, [("How the goals came", True)], fontsize=9)
 
-    _commentary(fig, 0.345, 0.22,
-        "The network shows a team wired through its No. 6: Rodri is the only node "
-        "touching every layer — back line, double pivot and front four. The strongest "
-        "links run down the flanks (Porro-Yamal, Cucurella-Baena), the launchpads for "
-        "Spain's wide overloads.", width=60, fontsize=8.2)
-    _commentary(fig, 0.345, 0.098,
-        "Structurally, the block was brave: a defensive line ~41 m out, seven metres "
-        "above the tournament norm — and disciplined, dropping only against the "
-        "fastest front lines (France, Argentina).", width=60, fontsize=8.2)
-    _footer(fig, "Line heights and pass volumes are estimates compiled from public match reports  ·  goal types (FotMob events): 9 open play, 2 counter-press, 1 penalty, 1 set piece, 1 own goal")
+    _commentary(fig, 0.40, 0.375,
+        "The shape map is built from every touch Spain played: Rodri sits deepest "
+        "and central with 984 of them, more than any teammate — the hub the whole "
+        "structure turns through. Behind him Cubarsi and Laporte took 854 and 818, "
+        "proof that the build-up genuinely started at the back; ahead, Cucurella and "
+        "Porro push so high they sit level with the midfield.", width=60, fontsize=8.2)
+    _commentary(fig, 0.40, 0.22,
+        "The zone split kills a lazy assumption: this was not a left-sided team. "
+        "Attacks were almost perfectly balanced — 37% left, 36% right, just 27% "
+        "through the middle — and the emphasis moved with the opponent, swinging "
+        "to 46% left against Austria and 44% against France. Territory tells the "
+        "rest: in six of eight matches more than half of Spain's passes were played "
+        "inside the opponent's half.", width=60, fontsize=8.2)
+    _footer(fig, "All figures from FotMob (Opta-sourced)  ·  goal types from FotMob situation tags: 11 open play, 1 corner, 1 penalty, 1 own goal won")
     return fig
 
 
 def press_page(d: dict) -> Figure:
+    m = d["matches"]
     fig = _new_page()
     _header(fig, "Out Of Possession : Winning The Ball Where It Hurts", active=2)
 
-    ax1 = fig.add_axes([0.035, 0.32, 0.30, 0.50])
-    _chart_title(fig, 0.185, 0.855, [("Defensive actions ", True),
-                                     ("cluster past halfway", False)], fontsize=9.6)
-    charts.pressing_heatmap(ax1, d["press_zones"])
-    _source(fig, 0.185, 0.30, "Source compiled data :", " pressures + recoveries by zone, all 8 games (est.)")
+    ax1 = fig.add_axes([0.05, 0.44, 0.27, 0.36])
+    _chart_title(fig, 0.185, 0.855, [("No team won it high ", False),
+                                     ("more often", True)], fontsize=9.8)
+    charts.poss_won_ranking(ax1, d["league"])
+    _source(fig, 0.185, 0.40, "Source FotMob :", " possessions won in the attacking third, per match")
 
-    ax2 = fig.add_axes([0.355, 0.32, 0.30, 0.50])
-    _chart_title(fig, 0.505, 0.855, [("71 high regains", True), (" — 19 became shots", False)],
-                 fontsize=9.6)
-    charts.high_regains_map(ax2, d["regains"])
-    _source(fig, 0.505, 0.30, "Source compiled data :", " regains in the last 40 m (illustrative layer)")
+    ax2 = fig.add_axes([0.40, 0.44, 0.26, 0.36])
+    _chart_title(fig, 0.53, 0.855, [("Pressing intensity ", True),
+                                    ("match by match", False)], fontsize=9.8)
+    charts.ppda_per_match(ax2, m)
+    _source(fig, 0.53, 0.40, "Source FotMob :", " opponent passes ÷ tackles + interceptions")
 
-    ax3 = fig.add_axes([0.72, 0.48, 0.25, 0.34])
-    _chart_title(fig, 0.845, 0.855, [("The fiercest press", True),
-                                     (" of the deep runners", False)], fontsize=9.6)
-    charts.ppda_bars(ax3, d["teams"])
-    _source(fig, 0.845, 0.41, "Source compiled data :", " passes allowed per defensive action (est.)")
+    ax3 = fig.add_axes([0.715, 0.44, 0.25, 0.36])
+    _chart_title(fig, 0.84, 0.855, [("Turning pressure into ", False),
+                                    ("the box", True)], fontsize=9.8)
+    charts.touches_box_chart(ax3, m)
+    _source(fig, 0.84, 0.40, "Source FotMob :", " Spain's touches in the opposition box")
 
-    _commentary(fig, 0.035, 0.235,
-        "The heat map gives the press its shape: the busiest zones sit just past halfway and in the "
-        "central corridor — Spain rarely defended deep because the ball rarely got that far. Olmo and "
-        "Oyarzabal screened the opponent's pivot while the winger and near-side eight jumped, funnelling "
-        "play into the crowded middle.", width=108)
-    _commentary(fig, 0.035, 0.135,
-        "And the press paid in goals, not just territory. Of 71 regains inside the opponent's final 40 m, "
-        "19 turned into a shot within fifteen seconds and five ended in the net — Merino's two late knockout winners "
-        "were both born from regains. An estimated PPDA of 8.9 made it the most aggressive press of "
-        "any quarter-finalist, pairing a 65% possession game with instant ball-winning: the double grip "
-        "that defined this champion.", width=108)
-    _footer(fig, "Event locations are an illustrative synthetic layer (seeded generator in scripts/) consistent with the aggregate estimates — see README")
+    _commentary(fig, 0.05, 0.35,
+        "Spain finished the tournament first of the 32 ranked sides for possessions won in the attacking "
+        "third — 6.1 per match, a third more than the France side they beat in the semi-final and more "
+        "than double Argentina's 2.9. That is the clearest number in this report: the champions did their "
+        "defending in the opponent's territory, not their own.", width=108)
+    _commentary(fig, 0.05, 0.245,
+        "The intensity was deliberately variable. Uruguay were pressed hardest — 11.6 opponent passes per "
+        "Spanish tackle or interception, the fiercest squeeze of the campaign — while against Belgium, the "
+        "one side to score against them, Spain sat off at 19.5 and paid for it. And the pressure converted "
+        "into territory that mattered: 51 touches in the opposition box against both Cape Verde and Austria, "
+        "and 32 in the Final, which turned into four big chances on a night Argentina created none.", width=108)
+    _footer(fig, "Every figure on this page is real FotMob (Opta-sourced) data — raw JSON cached in data/fotmob/")
     return fig
 
 
@@ -407,22 +414,24 @@ def goal_dna_page(d: dict) -> Figure:
         ax = fig.add_axes([x0, y0, 0.2, 0.30])
         charts.goal_chain(ax, chains[chains.goal_id == gid])
 
-    _photo(fig, [0.70, 0.50, 0.27, 0.32], "celebration.jpg")
-    fig.text(0.835, 0.475, "Yamal on top of the pile — semi-final, Dallas",
-             fontsize=7.2, color=GREY, ha="center")
-    _source(fig, 0.78, 0.448, "Photo :", " B. Berlin, Wikimedia Commons, CC BY-SA 4.0")
+    ax_map = fig.add_axes([0.685, 0.50, 0.29, 0.31])
+    _chart_title(fig, 0.83, 0.845, [("Where they actually shot ", True),
+                                    ("— all 8 games", False)], fontsize=9.4)
+    charts.goals_map(ax_map, d["all_shots"])
+    _source(fig, 0.83, 0.475, "Source FotMob :", " every Spain shot, real coordinates")
 
-    _commentary(fig, 0.70, 0.40,
-        "Six goals, four signatures. The wide overload (flank triangle, "
-        "cutback); the switch to the weak side; the counter-press strike "
-        "within seconds of a regain — Merino's 90th-minute winner in the "
-        "R16; and, when nothing came early, the patient kill: the Final "
-        "winner crossed the pitch twice before Cucurella found Torres.", width=48)
-    _commentary(fig, 0.70, 0.21,
-        "Note who keeps appearing: Yamal in three of the six chains "
-        "(carrier, crosser, penalty-winner), and a full-back or wing-back "
-        "involved in five. Spain's goals were systemic, not soloist.", width=48)
-    _footer(fig, "Chains are illustrative reconstructions from match reports & highlights — pass counts abridged  ·  Legend: solid = pass, dashed = dribble, gold = cross, red = strike")
+    _commentary(fig, 0.685, 0.435,
+        "Six goals, four signatures — the wide overload and cutback, the "
+        "switch to the weak side, the strike seconds after a regain, and "
+        "the patient kill that decided the Final.", width=50, fontsize=8.2)
+    _commentary(fig, 0.685, 0.315,
+        "The real shot map behind them is just as revealing: 140 attempts "
+        "worth 15.6 xG, almost all inside or on the edge of the box, and "
+        "barely a speculative effort from distance. Eleven of the fourteen "
+        "goals came from open play — one corner, one penalty, one own goal "
+        "forced — and the highest-value open-play chance of the campaign was "
+        "Merino's 0.69 xG winner against Belgium.", width=50, fontsize=8.2)
+    _footer(fig, "Shot map: real FotMob coordinates & xG  ·  the six chains are tactical reconstructions from match reports — solid = pass, dashed = dribble, gold = cross, red = strike")
     return fig
 
 
@@ -471,19 +480,26 @@ def organisation_page(_: dict) -> Figure:
     return fig
 
 
+# photo key -> (display name, role, real-data caption, name in touch dataset)
 GALLERY = {
     "rodri": [("Rodri", "DM  ·  Golden Ball"),
-              "91% pass accuracy  ·  the tempo dictator"],
+              "984 touches, most in the squad  ·  93.7 accurate passes per 90",
+              "Rodri"],
     "yamal": [("Lamine Yamal", "RW  ·  19 years old"),
-              "3.5 dribbles/game, best at WC26  ·  615 minutes"],
+              "4.0 successful dribbles per 90  ·  1.5 xA, 7 chances created",
+              "Lamine Yamal"],
     "oyarzabal": [("Mikel Oyarzabal", "ST  ·  top scorer"),
-                  "5 goals  ·  scored in 4 different matches"],
+                  "5 goals from 4.0 xG  ·  scored in four different matches",
+                  "Mikel Oyarzabal"],
     "simon": [("Unai Simon", "GK  ·  Golden Glove"),
-              "7 clean sheets  ·  1 goal against in 750'"],
+              "7 clean sheets in 8  ·  10.4 recoveries per 90, 2nd at WC26",
+              "Unai Simón"],
     "cubarsi": [("Pau Cubarsi", "CB  ·  Best Young Player"),
-                "top-5% long balls  ·  anchored the high line"],
+                "854 touches at 19  ·  more than any defender in the squad",
+                "Pau Cubarsí"],
     "olmo": [("Dani Olmo", "AM  ·  the pocket finder"),
-             "2 knockout assists  ·  started the Final"],
+             "10 chances created  ·  92nd percentile among WC26 attackers",
+             "Dani Olmo"],
 }
 
 
@@ -491,21 +507,22 @@ def gallery_page(d: dict) -> Figure:
     touches = d["touches"]
     fig = _new_page()
     _header(fig, "Some Of Their Key Players", active=4)
-    for i, (k, ((name, role), caption)) in enumerate(GALLERY.items()):
+    for i, (k, ((name, role), caption, data_name)) in enumerate(GALLERY.items()):
         col, row = i % 3, i // 3
         x0, y0 = 0.045 + col * 0.325, 0.47 - row * 0.385
+        mine = touches[touches.player == data_name]
         _photo(fig, [x0, y0 + 0.145, 0.078, 0.14], f"{k}.jpg", circle=True,
                border=GOLD if k in ("rodri", "simon", "cubarsi") else SPAIN_RED)
         fig.text(x0 + 0.095, y0 + 0.245, name, fontsize=11.5, family=SERIF,
                  fontweight="bold", color=NAVY)
         fig.text(x0 + 0.095, y0 + 0.215, role, fontsize=7.8, color=GREY)
         ax = fig.add_axes([x0 + 0.095, y0, 0.165, 0.20])
-        charts.player_heatmap(ax, touches[touches.player == k])
-        fig.text(x0 + 0.13, y0 - 0.012, caption, fontsize=7.2, color=DARK)
-        fig.text(x0 + 0.045, y0 - 0.036,
-                 f"Computed from {len(touches[touches.player == k])} touch events (modelled dataset)",
+        charts.player_heatmap(ax, mine)
+        fig.text(x0 + 0.13, y0 - 0.012, caption, fontsize=7.0, color=DARK)
+        fig.text(x0 + 0.095, y0 - 0.036,
+                 f"Heatmap computed from {len(mine)} real touches (FotMob match heatmaps)",
                  fontsize=5.8, color=GREY)
-    _footer(fig, "Player photos: Bryan Berlin, Wikimedia Commons, CC BY-SA 4.0 (WC26 semi-final & final)  ·  heatmaps computed from the committed touch-event dataset")
+    _footer(fig, "Player photos: Bryan Berlin, Wikimedia Commons, CC BY-SA 4.0 (WC26 semi-final & final)  ·  heatmaps built from 7,724 real touch coordinates")
     return fig
 
 
@@ -518,32 +535,36 @@ def final_micro_page(d: dict) -> Figure:
              "data from FotMob: 20-2 shots, 12-0 on target, 2.29-0.22 xG",
              fontsize=9.5, family=SERIF, color=GREY, ha="center")
 
-    ax1 = fig.add_axes([0.035, 0.40, 0.30, 0.42])
+    ax1 = fig.add_axes([0.035, 0.42, 0.30, 0.40])
     _chart_title(fig, 0.185, 0.845, [("Every shot ", True), ("of the Final", False)])
     charts.final_shot_map(ax1, shots)
-    _source(fig, 0.185, 0.375, "Source FotMob :", " shotmap — real coordinates & per-shot xG")
+    _source(fig, 0.185, 0.395, "Source FotMob :", " shotmap — real coordinates & per-shot xG")
 
-    ax2 = fig.add_axes([0.40, 0.44, 0.28, 0.375])
-    _chart_title(fig, 0.54, 0.845, [("The xG race ", True), ("— one-way traffic", False)])
+    ax2 = fig.add_axes([0.39, 0.46, 0.27, 0.355])
+    _chart_title(fig, 0.525, 0.845, [("The xG race ", True), ("— one-way traffic", False)])
     charts.xg_race(ax2, shots)
-    _source(fig, 0.54, 0.375, "Source FotMob :", " cumulative xG, 120 minutes")
+    _source(fig, 0.525, 0.415, "Source FotMob :", " cumulative xG, 120 minutes")
 
-    ax3 = fig.add_axes([0.735, 0.44, 0.235, 0.375])
-    _chart_title(fig, 0.85, 0.845, [("Shots per ", False), ("15-minute window", True)])
+    ax3 = fig.add_axes([0.715, 0.46, 0.255, 0.355])
+    _chart_title(fig, 0.845, 0.845, [("Shots per ", False), ("15-minute window", True)])
     charts.shots_by_window(ax3, shots)
-    _source(fig, 0.85, 0.375, "Source FotMob :", " shot volume by window")
+    _source(fig, 0.845, 0.415, "Source FotMob :", " shot volume by window")
 
-    _commentary(fig, 0.035, 0.29,
+    ax4 = fig.add_axes([0.545, 0.115, 0.42, 0.155])
+    _chart_title(fig, 0.755, 0.30, [("Match momentum ", True),
+                                    ("— Spain on top almost throughout", False)],
+                 fontsize=9.6)
+    charts.momentum_chart(ax4, d["momentum"])
+    _source(fig, 0.965, 0.075, "Source FotMob :", "")
+
+    _commentary(fig, 0.035, 0.34,
         "The map shows a siege: Spain's twenty attempts ring the Argentine box, twelve on target, while "
-        "Argentina did not attempt a single shot until the 117th minute — Messi's late effort and a "
-        "Simeone strike in the final seconds were all they mustered. The xG race tells the same story as "
-        "a line that only ever climbs in red: 2.29 expected goals to 0.22, total control without reward "
-        "until the very end.", width=108)
-    _commentary(fig, 0.035, 0.18,
-        "Then the dam broke twice in thirteen minutes: Enzo Fernandez's second yellow in stoppage time "
-        "left the champions a man down, and in the 106th minute Ferran Torres finished the move the whole "
-        "final had been building toward. The window chart shows why it felt inevitable — Spain registered "
-        "shots in seven of eight segments; Argentina's only replies came in the dying minutes.", width=108)
+        "Argentina did not attempt a single shot until the 117th minute — Messi's effort and a Simeone "
+        "strike in the last seconds were all they mustered.", width=62)
+    _commentary(fig, 0.035, 0.225,
+        "The xG race only ever climbs in red: 2.29 expected goals to 0.22. Then the dam broke twice in "
+        "thirteen minutes — Enzo Fernandez's second yellow in stoppage time, and Ferran Torres finishing "
+        "in the 106th the move the whole final had been building toward.", width=62)
     _footer(fig, "All match data: FotMob (Opta-based), fetched by scripts/fetch_fotmob.py — raw JSON cached in data/fotmob/")
     return fig
 
@@ -563,7 +584,7 @@ def context_page(d: dict) -> Figure:
     ax2 = fig.add_axes([0.53, 0.42, 0.29, 0.38])
     _chart_title(fig, 0.675, 0.845, [("Two generations, ", False), ("one core", True)])
     charts.age_minutes(ax2, players)
-    _source(fig, 0.675, 0.345, "Source compiled data :", " age at the Final vs minutes played (est.)")
+    _source(fig, 0.675, 0.345, "Source FotMob :", " age at the Final vs minutes played")
 
     avg_age = (players.age * players.minutes).sum() / players.minutes.sum()
     _stat_card(fig, 0.865, 0.62, 0.115, 0.14, f"{avg_age:.1f}",
@@ -579,7 +600,7 @@ def context_page(d: dict) -> Figure:
         "The squad structure explains why this may only be the beginning. The minutes were carried by two "
         "generations at once: a prime core aged 26-30 (Rodri, Oyarzabal, Simon, Cucurella) and a teenage "
         "spine — Cubarsi and Yamal, both 19, both starters in the Final. A minutes-weighted average age "
-        "of ~27 with the two youngest players locked into the XI is the profile of a team built to defend "
+        "of 26.4 with the two youngest players locked into the XI is the profile of a team built to defend "
         "this title in 2030.", width=108)
     _footer(fig, "Champions' records: FIFA tournament archives (2006-2022 winners each played 7 matches; the expanded 2026 format required 8)")
     return fig
@@ -604,7 +625,7 @@ def squad_page(d: dict) -> Figure:
     ax3 = fig.add_axes([0.72, 0.47, 0.25, 0.35])
     _chart_title(fig, 0.845, 0.855, [("Production ", False), ("vs minutes played", True)])
     charts.contribution_scatter(ax3, p)
-    _source(fig, 0.845, 0.40, "Source compiled data :", " goal involvements per 90")
+    _source(fig, 0.845, 0.40, "Source FotMob :", " goal involvements per 90")
 
     _commentary(fig, 0.70, 0.345,
         "De la Fuente found his best XI by the semi-final and never touched it again — the same "
@@ -638,10 +659,10 @@ def profiles_page(d: dict) -> Figure:
         charts.profile_panel(ax, rows, accents[name])
 
     fig.text(0.5, 0.085,
-             "Percentile bars rank each player against positional peers at WC26 "
-             "(estimates compiled from public reports — gold = individual award winner).",
+             "Every value is real FotMob data. Each bar is the player's true percentile against "
+             "WC26 players in the same position group who played 180+ minutes (gold = award winner).",
              fontsize=8, color=GREY, ha="center")
-    _footer(fig, "Awards: Golden Ball — Rodri  ·  Golden Glove — U. Simon  ·  Best Young Player — P. Cubarsi  ·  Yamal: 3.5 dribbles/game, best at WC26")
+    _footer(fig, "Awards: Golden Ball — Rodri  ·  Golden Glove — U. Simon  ·  Best Young Player — P. Cubarsi  ·  percentile peer groups: 27 GKs, 109 DFs, 90 MFs, 105-152 ATTs")
     return fig
 
 
@@ -664,16 +685,24 @@ def england_page(d: dict) -> Figure:
     charts.duo_dependency(ax2)
     _source(fig, 0.505, 0.525, "Source beIN / englandfootball.com :", " Kane 6 + Bellingham 7, first 6+6 duo in WC history")
 
+    t = d["teams"].set_index("team")
+    esp, eng = t.loc["Spain"], t.loc["England"]
     ax3 = fig.add_axes([0.70, 0.42, 0.27, 0.40])
     _chart_title(fig, 0.835, 0.845, [("Head to head ", True), ("by the numbers", False)])
     charts.butterfly(ax3, [
-        ("Goals per match", 2.50, 1.75, "2.50", "1.75", 0),
-        ("Goals conceded per match", 1.50, 0.13, "1.50", "0.13", 1),
-        ("Clean sheets", 2, 7, "2", "7", 1),
-        ("Matches conceding 2+", 4, 0, "4", "0", 1),
-        ("Top-duo share of goals", 65, 50, "65%", "50%", 1),
+        ("Goals per match", eng.gf / eng.matches, esp.gf / esp.matches,
+         f"{eng.gf / eng.matches:.2f}", f"{esp.gf / esp.matches:.2f}", 0),
+        ("Goals conceded per match", eng.ga / eng.matches, esp.ga / esp.matches,
+         f"{eng.ga / eng.matches:.2f}", f"{esp.ga / esp.matches:.2f}", 1),
+        ("xG conceded (tournament)", eng.xg_against, esp.xg_against,
+         f"{eng.xg_against:.1f}", f"{esp.xg_against:.1f}", 1),
+        ("Clean sheets", eng.clean_sheets, esp.clean_sheets,
+         f"{eng.clean_sheets:.0f}", f"{esp.clean_sheets:.0f}", 1),
+        ("Ball won in attacking third /match", eng.poss_won_final_third,
+         esp.poss_won_final_third, f"{eng.poss_won_final_third:.1f}",
+         f"{esp.poss_won_final_third:.1f}", 1),
     ])
-    _source(fig, 0.835, 0.395, "Source compiled data :", " both teams, 8 matches each")
+    _source(fig, 0.835, 0.395, "Source FotMob :", " both teams, 8 matches each")
 
     _commentary(fig, 0.36, 0.46,
         "England were the tournament's heaviest scorers — 20 goals, more than Spain — powered by the "
@@ -682,10 +711,10 @@ def england_page(d: dict) -> Figure:
         "out-gun anyone, and their 6-4 bronze-final win over France showed it.", width=64)
     _commentary(fig, 0.36, 0.30,
         "But the numbers also explain why Spain would have been favourites in the final that never was. "
-        "England conceded 12 times and shipped two or more in half their games; Spain conceded once all "
-        "month. And England's goals ran through two men (65%), a dependency Spain's system is built to "
-        "break — Rodri screening Bellingham's arrivals, Cubarsi and Laporte isolating Kane, and a press "
-        "that starves the supply line. Firepower against a fortress: the fortress finished with the cup.", width=64)
+        "England conceded 12 goals from 9.3 expected; Spain conceded one from 2.4. England kept two clean "
+        "sheets to Spain's seven. And England's goals ran through two men (65%), a dependency Spain's "
+        "system is built to break — a press that won the ball in the attacking third 6.1 times a match "
+        "against England's 3.4, starving the supply line long before it reaches the finisher.", width=64)
     _footer(fig, "England route: Croatia 4-2, Ghana 0-0, Panama 2-0, DR Congo 2-1, Mexico 3-2, Norway 2-1, Argentina 1-2, France 6-4  ·  Coach: Thomas Tuchel")
     return fig
 
@@ -698,13 +727,13 @@ def identity_page(d: dict) -> Figure:
     ax1 = fig.add_axes([0.045, 0.40, 0.24, 0.42], polar=True)
     _chart_title(fig, 0.165, 0.855, [("Spain ", True), ("vs beaten rivals (avg)", False)])
     charts.radar_identity(ax1, m, t)
-    _source(fig, 0.165, 0.345, "Source compiled data :", " normalised per-match profile")
+    _source(fig, 0.165, 0.345, "Source FotMob :", " normalised per-match profile")
 
     cards = [("RODRI", "Golden Ball — best player", GOLD),
              ("U. SIMON", "Golden Glove — 7 clean sheets", SPAIN_RED),
              ("P. CUBARSI", "Best Young Player — age 19", SPAIN_RED),
              ("M. OYARZABAL", "5 goals — Spain top scorer", SPAIN_RED),
-             ("L. YAMAL", "3.5 dribbles per game — best at WC26", SPAIN_RED),
+             ("L. YAMAL", "4.0 dribbles per 90 — 98th percentile", SPAIN_RED),
              ("F. TORRES", "Scored the Final winner, 106'", GOLD)]
     for i, (v, l, accent) in enumerate(cards):
         x, y = 0.335 + (i % 3) * 0.222, 0.63 - (i // 3) * 0.155
@@ -714,7 +743,7 @@ def identity_page(d: dict) -> Figure:
         ("1. Elite defence", "One goal conceded in eight games; xG against never above 0.7 (FotMob)."),
         ("2. Shared goals", "Eleven players with a goal or assist; four knockout winners from four scorers."),
         ("3. Midfield control", "51%+ possession in every match (avg 64%), run by Golden Ball winner Rodri."),
-        ("4. Squad depth", "Oyarzabal & Torres delivered while Yamal worked back from injury."),
+        ("4. Squad depth", "Merino scored two knockout winners in just 193 minutes off the bench."),
         ("5. Big-game nerve", "Portugal, Belgium, France, Argentina beaten in succession."),
     ]
     fig.text(0.335, 0.415, "Five reasons Spain won", fontsize=12.5,

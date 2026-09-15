@@ -1,14 +1,23 @@
 # Why Spain Won The 2026 World Cup — A Data Story 🇪🇸🏆
 
 A football analytics report on Spain's victorious FIFA World Cup 2026 campaign,
-**generated 100% programmatically in Python** (pandas + matplotlib). Running one
-script turns nine small CSV datasets into a designed, magazine-style 9-page PDF
-report — themed after the World Cup 26 brand (deep navy + the Canada/Mexico/USA
-tri-colour stripe + trophy gold) — with a deliberately wide visual vocabulary:
-zonal pressing **heatmaps**, a **passing-network graph**, pitch maps of **high
-regains** and **line heights**, **donut** charts, percentile **player cards**,
-radars, steppers, scatters and comparative bars, all drawn from scratch on
+**generated 100% programmatically in Python** (pandas + matplotlib) from **real
+Opta-sourced match data**. One script pulls the data from FotMob's public API,
+a second turns it into a designed, magazine-style 15-page PDF — themed after the
+World Cup 26 brand (deep navy + the Canada/Mexico/USA tri-colour stripe + trophy
+gold) — with a deliberately wide visual vocabulary: touch **heatmaps** built from
+7,724 real touch coordinates, an average-position **team-shape map**, **shot maps**
+sized by xG, a cumulative **xG race**, **momentum**, **donut** and stacked-zone
+charts, percentile **player cards**, radars, steppers, scatters, diverging
+butterflies and virtual **tactical-camera** frames, all drawn from scratch on
 matplotlib pitches.
+
+> **Data note:** every chart in this report is built from real FotMob (Opta) data —
+> per-match xG, possession, shots, passes, tackles, interceptions, touch
+> coordinates, full shotmaps, minutes, and tournament-wide rankings across all 48
+> teams and 383 players. The only hand-drawn elements are explicitly labelled
+> tactical diagrams (the three principle boards and six goal build-up chains),
+> which illustrate analysis rather than claim to be measurements.
 
 📄 **Output:** [`output/spain_wc2026_report.pdf`](output/spain_wc2026_report.pdf)
 
@@ -27,13 +36,13 @@ matplotlib pitches.
 1. **Title** — campaign at a glance
 2. **Tournament Landscape** — the road to the final, cumulative goals, attack–defence balance vs rivals
 3. **In Possession** — possession control, chance creation (xG) vs goals, 11 players with a goal involvement
-4. **Structure & Networks** — Final-XI passing network, defensive/midfield line heights on a pitch,
-   line discipline per match, goal-types donut
-5. **Goal DNA** — six goal build-up patterns drawn as pass-chain mini pitches, plus a real
-   celebration photo
+4. **Team Shape & Threat** — average touch positions from 7,724 real touches, real attacking-zone
+   split (left/centre/right), territorial dominance, goal-types donut
+5. **Goal DNA** — six goal build-up patterns as pass-chain diagrams, beside the real shot map of
+   all 140 Spain attempts
 6. **Out of Possession I** — the one-goal fortress, conceded-goals ranking, the Final's shot dominance
-7. **Out of Possession II — the press** — zonal heatmap of defensive actions, high-regains pitch map
-   (71 regains → 19 shots → 5 goals), PPDA comparison
+7. **Out of Possession II — the press** — Spain ranked 1st of 32 for possessions won in the
+   attacking third, real PPDA per match, touches in the opposition box
 8. **Organisation On The Pitch** — each principle shown twice: analyst plan boards on top and
    **virtual tactical-camera frames** below (a perspective-projected broadcast view rendered in
    matplotlib: grass stripes, depth-scaled players, highlight rings, shaded traps)
@@ -43,7 +52,7 @@ matplotlib pitches.
 11. **Key Players Under The Microscope** — six individual profiles with percentile bars
     (Rodri, Simón, Oyarzabal, Yamal, Cubarsí, Olmo)
 12. **Key Players Gallery** — real player photos (CC-licensed) with heatmaps computed from
-    touch-point data
+    each player's real touch coordinates
 13. **The One That Got Away** — England, the third-placed heavyweight Spain never met:
     their route, the Kane–Bellingham duo dependency, and a butterfly head-to-head
 14. **A Champion In Context** — goals conceded by every World Cup winner 2006–2026
@@ -54,56 +63,86 @@ matplotlib pitches.
 
 ```bash
 pip install -r requirements.txt
-python src/build_report.py
+python scripts/fetch_fotmob.py     # pull real match data (cached after first run)
+python src/build_report.py         # render the PDF
 ```
 
-The PDF is written to `output/spain_wc2026_report.pdf`.
+The PDF is written to `output/spain_wc2026_report.pdf`. The fetch step is optional
+on a fresh clone — the CSVs it produces are committed, and the cached FotMob JSON
+in `data/fotmob/` makes reruns free.
 
 ## Project structure
 
 ```
-├── data/
-│   ├── matches.csv            # Spain's 8 matches: scores, scorers, per-match metrics
-│   ├── teams_comparison.csv   # Spain vs the rivals it eliminated (incl. PPDA)
-│   ├── players.csv            # squad: minutes, goals, assists, final starters, awards
-│   ├── player_profiles.csv    # per-player metric profiles for the percentile cards
-│   ├── pass_network.csv       # Final-XI pass combinations for the network graph
-│   ├── line_heights.csv       # defensive & midfield line height per match
-│   ├── goal_types.csv         # how the 14 goals were scored
-│   ├── pressing_zones.csv     # defensive actions per pitch zone (heatmap)
-│   ├── high_regains.csv       # regain locations + outcomes (synthetic layer)
-│   └── england_matches.csv    # England's route — the strongest side Spain avoided
+├── data/                          # every file below is written by the fetch script
+│   ├── fotmob/                    # raw cached API responses — the audit trail
+│   ├── matches.csv                # per-match xG, possession, shots, passes, duels
+│   ├── all_shots.csv              # all 140 Spain shots: coords, xG, situation
+│   ├── final_shots.csv            # the Final's full shotmap (both teams)
+│   ├── final_momentum.csv         # minute-by-minute momentum of the Final
+│   ├── player_touches.csv         # 7,724 real touch coordinates
+│   ├── player_positions.csv       # average touch position + volume per player
+│   ├── players.csv                # minutes, goals, assists, ages
+│   ├── player_profiles.csv        # key-player metrics + true position percentiles
+│   ├── league_team_stats.csv      # tournament-wide rankings, all 48 teams
+│   ├── teams_comparison.csv       # Spain, the sides it beat, and England
+│   ├── attacking_zones.csv        # left/centre/right attack split per match
+│   ├── goal_types.csv             # goals by FotMob situation tag
+│   ├── champions_history.csv      # goals conceded by past winners (FIFA archives)
+│   ├── england_matches.csv        # England's route (match reports)
+│   └── goal_chains.csv            # the six goal diagrams (tactical reconstruction)
 ├── scripts/
-│   └── generate_synthetic_layers.py  # seeded generator for the event-level layer
+│   ├── fetch_fotmob.py            # pulls & shapes all real data
+│   └── fetch_api_football.py      # optional API-Sports loader (needs a free key)
 ├── src/
-│   ├── config.py              # visual identity: palette, typography, page geometry
-│   ├── charts.py              # reusable chart builders (each draws into an Axes)
-│   ├── pages.py               # page layouts: header bands, commentary, stat cards
-│   └── build_report.py        # entry point: data -> figures -> multi-page PDF
+│   ├── config.py                  # visual identity: palette, typography, geometry
+│   ├── charts.py                  # reusable chart builders (each draws into an Axes)
+│   ├── pages.py                   # page layouts: header bands, commentary, cards
+│   └── build_report.py            # entry point: data -> figures -> multi-page PDF
 └── output/
     └── spain_wc2026_report.pdf
 ```
 
 ## Data provenance
 
-- **Real provider data (FotMob, Opta-based)** — fetched by `scripts/fetch_fotmob.py`
-  from FotMob's public API, with every raw JSON response cached in `data/fotmob/`
-  so the numbers are auditable:
-  - per-match **xG for/against, possession, shots, shots on target** (`matches.csv`)
-  - the Final's **complete shotmap** — real coordinates, per-shot xG, outcomes
-    (`final_shots.csv`)
-  - real **minutes, goals, assists and ages** for all 16 used players (`players.csv`)
-  - real **goal events** (scorers and minutes, including the Saudi own goal)
-- **Verified editorial facts** (route, awards, Final XI, red card) from
-  [FIFA](https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/final),
+**All quantitative content is real.** `scripts/fetch_fotmob.py` pulls it from
+FotMob's public API (Opta-sourced) and caches every raw JSON response under
+`data/fotmob/`, so any number in the report can be traced back to its source:
+
+| Layer | What is real |
+|---|---|
+| Match metrics | xG for/against (open play and set play split), possession, shots, shots on target, touches in the opposition box, big chances, passes by half, tackles, interceptions |
+| Shots | All 140 Spain attempts and both teams' Final shotmaps — true pitch coordinates, per-shot xG, outcome and situation tag |
+| Players | Minutes, goals, assists and ages for all 16 players used; 7,724 touch coordinates parsed from FotMob's per-match heatmaps |
+| Percentiles | Computed against every WC26 player in the same position group with 180+ minutes (383-player feeds) |
+| Tournament context | Team rankings across all 48 teams — including possessions won in the attacking third, where Spain finished 1st of the 32 ranked sides |
+| The Final | Minute-by-minute momentum, cumulative xG, shot timings |
+
+Two categories are *not* measurements, and both say so on the page:
+
+- **Tactical diagrams** — the three principle boards, the tactical-camera frames and
+  the six goal build-up chains. These illustrate analysis (how the press was
+  structured, how a goal was built) the way a coach's whiteboard does. Pass-by-pass
+  event chains are not available from any public source.
+- **Editorial facts** — the route, awards, Final XI, red card and England's results,
+  from [FIFA](https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/final),
   [ESPN](https://www.espn.com/soccer/match/_/gameId/760517/argentina-spain),
-  [Sports Illustrated](https://www.si.com/soccer/spain-vs-argentina-confirmed-lineups-2026-world-cup-final) and
-  [Yahoo Sports](https://sports.yahoo.com/articles/no-yamal-golden-ball-boot-225800390.html).
-- **Modelled layers, clearly labelled as such in the report** — data that no public
-  source provides (tracking-derived): player touch heatmaps, pressing zones, high-regain
-  locations, line heights, pass-network volumes, PPDA, rivals' xG totals, and England's
-  xG. These are produced by the seeded generator in `scripts/` and are kept only where
-  provider data does not exist; each carries an "(est.)" or "modelled" caption.
+  [Sports Illustrated](https://www.si.com/soccer/spain-vs-argentina-confirmed-lineups-2026-world-cup-final)
+  and [Yahoo Sports](https://sports.yahoo.com/articles/no-yamal-golden-ball-boot-225800390.html).
+
+### What the real data changed
+
+Working from measurements rather than assumptions overturned three things an
+earlier draft of this report had guessed at — a useful reminder of why provenance
+matters:
+
+- Spain were **not** a left-sided team. The real attacking-zone split is 37% left,
+  36% right, 27% centre: two-footed, and re-weighted per opponent.
+- **Pau Cubarsí is not a high-volume defender** (25th percentile for interceptions
+  among centre-backs). Spain's defence worked by denying the ball, not by winning
+  tackles — he took 854 touches, more than any other defender in the squad.
+- The Final was even more one-sided than reported: **20-2 on shots and 12-0 on
+  target**, with Argentina's first attempt arriving in the 117th minute.
 
 ## Designed cover
 
@@ -134,9 +173,8 @@ final by **Bryan Berlin**, published on
 under **CC BY-SA 4.0** (player portraits are the cropped versions used by the
 players' Wikipedia articles). Tactic boards are original drawings. Player heatmaps
 are **computed** (2D histogram + gaussian kernel smoothing) from
-`data/touch_points.csv`, a modelled touch-event dataset produced by the seeded
-generator in `scripts/` — real tracking data for WC26 is not publicly available,
-so the pipeline is written to be pointed at provider event data when you have it.
+`data/player_touches.csv` — 7,724 real touch coordinates parsed out of FotMob's
+per-match heatmap payloads, one point per touch.
 
 ## Design
 

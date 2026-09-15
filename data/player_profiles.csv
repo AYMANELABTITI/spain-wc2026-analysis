@@ -1,19 +1,19 @@
-﻿player,role_line,metric,value_label,percentile
-Rodri,DM - Golden Ball winner,Pass accuracy,91% (est.),96
-Rodri,DM - Golden Ball winner,Passes per 90,94 (est.),95
-Rodri,DM - Golden Ball winner,Ball recoveries per 90,7.1 (est.),88
-Lamine Yamal,RW - best dribbler at WC26,Dribbles per game,3.5 - best at WC26,99
-Lamine Yamal,RW - best dribbler at WC26,Minutes played,615 (FotMob),85
-Lamine Yamal,RW - best dribbler at WC26,Chances created per 90,2.6 (est.),92
-Mikel Oyarzabal,ST - Spain top scorer,Goals,5,95
-Mikel Oyarzabal,ST - Spain top scorer,xG per 90,0.62 (est.),90
-Mikel Oyarzabal,ST - Spain top scorer,Shots on target per 90,1.8 (est.),89
-Unai Simon,GK - Golden Glove winner,Clean sheets,7 of 8,99
-Unai Simon,GK - Golden Glove winner,Save percentage,92% (est.),97
-Unai Simon,GK - Golden Glove winner,Goals conceded,1 in 750 min,99
-Pau Cubarsi,CB - Best Young Player (19),Interceptions per 90,2.4 (est.),91
-Pau Cubarsi,CB - Best Young Player (19),Accurate long balls per 90,6.2 (est.),93
-Pau Cubarsi,CB - Best Young Player (19),Duels won,68% (est.),85
-Dani Olmo,AM - the space finder,Key passes per 90,2.2 (est.),88
-Dani Olmo,AM - the space finder,Progressive carries per 90,3.4 (est.),86
-Dani Olmo,AM - the space finder,Expected assists per 90,0.31 (est.),84
+player,role_line,metric,value_label,percentile,peers
+Rodri,DM - Golden Ball winner,Accurate passes per 90,93.7,99,90
+Rodri,DM - Golden Ball winner,Recoveries per 90,5,77,90
+Rodri,DM - Golden Ball winner,Defensive actions per 90,5.1,59,90
+Lamine Yamal,RW - 19 years old,Successful dribbles per 90,4,98,105
+Lamine Yamal,RW - 19 years old,Chances created,7,78,144
+Lamine Yamal,RW - 19 years old,Expected assists (xA),1.5,94,152
+Mikel Oyarzabal,ST - Spain top scorer,Goals,5,93,81
+Mikel Oyarzabal,ST - Spain top scorer,Expected goals (xG),4,98,150
+Mikel Oyarzabal,ST - Spain top scorer,Shots on target per 90,1.8,90,98
+Unai Simon,GK - Golden Glove winner,Clean sheets,7,100,27
+Unai Simon,GK - Golden Glove winner,Recoveries per 90,10.4,96,28
+Unai Simon,GK - Golden Glove winner,Accurate passes per 90,23.6,86,28
+Pau Cubarsi,CB - Best Young Player (19),Interceptions per 90,0.6,25,109
+Pau Cubarsi,CB - Best Young Player (19),Clearances per 90,3.8,55,113
+Pau Cubarsi,CB - Best Young Player (19),Accurate long balls per 90,1.8,61,114
+Dani Olmo,AM - the pocket finder,Chances created,10,92,144
+Dani Olmo,AM - the pocket finder,Possession won final 3rd per 90,0.5,51,93
+Dani Olmo,AM - the pocket finder,Accurate passes per 90,38.2,88,114
