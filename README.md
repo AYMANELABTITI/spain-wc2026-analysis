@@ -99,12 +99,15 @@ The PDF is written to `output/spain_wc2026_report.pdf`.
 and used here solely to identify the tournament in a non-commercial fan analysis.
 All trademarks belong to FIFA.
 
-`assets/photos/` contains photographs taken at the WC26 semi-final and final by
-**Bryan Berlin**, published on
+`assets/photos/` contains in-match photographs taken at the WC26 semi-final and
+final by **Bryan Berlin**, published on
 [Wikimedia Commons](https://commons.wikimedia.org/w/index.php?search=Argentina+v+Spain+19+July+2026)
 under **CC BY-SA 4.0** (player portraits are the cropped versions used by the
-players' Wikipedia articles). Tactic boards and heatmaps are original drawings —
-reconstructions and models, not tracking data, and labelled as such in the report.
+players' Wikipedia articles). Tactic boards are original drawings. Player heatmaps
+are **computed** (2D histogram + gaussian kernel smoothing) from
+`data/touch_points.csv`, a modelled touch-event dataset produced by the seeded
+generator in `scripts/` — real tracking data for WC26 is not publicly available,
+so the pipeline is written to be pointed at provider event data when you have it.
 
 ## Design
 

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.figure import Figure
-from matplotlib.patches import FancyBboxPatch
+from matplotlib.patches import Ellipse, FancyBboxPatch
 
 import matplotlib.image as mpimg
 
@@ -424,65 +424,91 @@ def goal_dna_page(d: dict) -> Figure:
     return fig
 
 
+def _action_photo(fig: Figure, box: list[float], path: str, caption: str,
+                  ellipse: tuple[float, float, float, float] | None = None) -> None:
+    """In-match photo with an analyst-style highlight ellipse (image-fraction
+    coordinates) and a caption underneath."""
+    img = mpimg.imread(ASSETS_DIR / "photos" / path)
+    ax = fig.add_axes(box, zorder=3)
+    ax.imshow(img)
+    if ellipse:
+        h, w = img.shape[:2]
+        fx, fy, fw, fh = ellipse
+        ax.add_patch(Ellipse((fx * w, fy * h), fw * w, fh * h, fill=False,
+                             edgecolor="#FFD34D", lw=2.2))
+    ax.axis("off")
+    fig.text(box[0] + box[2] / 2, box[1] - 0.028, caption, fontsize=7.0,
+             color=GREY, ha="center")
+
+
 def organisation_page(_: dict) -> Figure:
     fig = _new_page()
-    _header(fig, "Organisation On The Pitch : Three Snapshots", active=2)
+    _header(fig, "Organisation On The Pitch : Three Principles", active=2)
 
-    boards = [(charts.board_build, "IN POSSESSION — the 3-2-5 build",
-               "Cucurella releases high while Porro tucks into a back three; "
-               "the front five overload the left."),
-              (charts.board_press, "OUT OF POSSESSION — the curve press",
-               "Oyarzabal's curved run hides the centre; play is shown to "
-               "the touchline, where the trap springs."),
-              (charts.board_counterpress, "TRANSITION — the 5-second rule",
-               "Lose it, and the nearest four collapse on the ball — the "
-               "engine behind 71 high regains.")]
-    for i, (draw, title, sub) in enumerate(boards):
+    boards = [(charts.board_build, "IN POSSESSION — the 3-2-5 build"),
+              (charts.board_press, "OUT OF POSSESSION — the curve press"),
+              (charts.board_counterpress, "TRANSITION — the 5-second rule")]
+    for i, (draw, title) in enumerate(boards):
         x0 = 0.035 + i * 0.225
         fig.text(x0 + 0.1, 0.845, title, fontsize=8.2, color=NAVY,
                  ha="center", fontweight="bold")
-        ax = fig.add_axes([x0, 0.42, 0.2, 0.40])
+        ax = fig.add_axes([x0, 0.44, 0.2, 0.38])
         draw(ax)
-        _commentary(fig, x0 + 0.005, 0.40, sub, width=42, fontsize=7.4)
 
-    _photo(fig, [0.725, 0.55, 0.245, 0.27], "startingxi.jpg")
-    fig.text(0.8475, 0.525, "The XI before the semi-final vs France",
-             fontsize=7.2, color=GREY, ha="center")
-    _photo(fig, [0.725, 0.175, 0.245, 0.27], "huddle.jpg")
-    fig.text(0.8475, 0.15, "The huddle before the Final, MetLife Stadium",
-             fontsize=7.2, color=GREY, ha="center")
+    shots = [("rodri_action.jpg",
+              "Rodri fires the first pass of another attack — the Final",
+              (0.50, 0.85, 0.72, 0.10)),
+             ("cucurella_action.jpg",
+              "Cucurella releasing into the left overload — semi-final",
+              (0.44, 0.90, 0.60, 0.09)),
+             ("yamal_action.jpg",
+              "Yamal kills a switch of play in mid-air — semi-final",
+              (0.46, 0.86, 0.52, 0.12))]
+    for i, (p, cap, ell) in enumerate(shots):
+        _action_photo(fig, [0.045 + i * 0.225, 0.095, 0.19, 0.30], p, cap, ell)
+    fig.text(0.35, 0.033 + 0.014, "", fontsize=1, color=GREY)
 
-    _commentary(fig, 0.035, 0.24,
-        "Three pictures of the same idea: control territory. With the ball Spain build a 3-2-5 that pins "
-        "opponents in their own half; without it the front two curve their runs to make the pitch small; "
-        "and in the moment between, the counter-press turns danger into the team's best chance-creation "
-        "engine. Every phase is a territorial argument — and Spain won it in all eight matches.", width=92)
-    _footer(fig, "Boards are tactical reconstructions from match reports & broadcast analysis  ·  Photos: Bryan Berlin, Wikimedia Commons, CC BY-SA 4.0")
+    _commentary(fig, 0.725, 0.80,
+        "Three boards, one idea: control territory. With the ball, "
+        "Spain build a 3-2-5 that pins opponents in their own half — "
+        "Cucurella releases while Porro tucks in.", width=44, fontsize=8.2)
+    _commentary(fig, 0.725, 0.63,
+        "Without it, Oyarzabal's curved run hides the centre and shows "
+        "the touchline, where the trap springs shut.", width=44, fontsize=8.2)
+    _commentary(fig, 0.725, 0.50,
+        "And in the moment between, the nearest four collapse on the "
+        "ball inside five seconds — the engine behind 71 high regains.", width=44,
+        fontsize=8.2)
+    _commentary(fig, 0.725, 0.36,
+        "Below, the principles in the flesh: the first pass, the "
+        "release, and the touch that turns a switch of play into "
+        "danger. Every phase is a territorial argument — Spain won "
+        "it in all eight matches.", width=44, fontsize=8.2)
+    _footer(fig, "Boards are tactical reconstructions from match reports & broadcast analysis  ·  In-match photos: Bryan Berlin, Wikimedia Commons, CC BY-SA 4.0")
     return fig
 
 
-HEAT_SPOTS = {
-    "rodri": [("Rodri", "DM  ·  Golden Ball"), [(48, 34, 1, 14, 12), (62, 30, 0.5, 12, 10)],
+GALLERY = {
+    "rodri": [("Rodri", "DM  ·  Golden Ball"),
               "91% pass accuracy  ·  the tempo dictator"],
-    "yamal": [("Lamine Yamal", "RW  ·  19 years old"), [(76, 12, 1, 12, 8), (60, 18, 0.5, 12, 9), (88, 22, 0.6, 8, 8)],
+    "yamal": [("Lamine Yamal", "RW  ·  19 years old"),
               "3.5 dribbles/game, best at WC26  ·  3 assists"],
-    "oyarzabal": [("Mikel Oyarzabal", "ST  ·  top scorer"), [(88, 34, 1, 9, 9), (70, 24, 0.5, 11, 9)],
+    "oyarzabal": [("Mikel Oyarzabal", "ST  ·  top scorer"),
                   "5 goals  ·  scored in 4 different matches"],
-    "simon": [("Unai Simon", "GK  ·  Golden Glove"), [(6, 34, 1, 6, 9), (16, 34, 0.35, 8, 12)],
+    "simon": [("Unai Simon", "GK  ·  Golden Glove"),
               "7 clean sheets  ·  1 goal against in 750'"],
-    "cubarsi": [("Pau Cubarsi", "CB  ·  Best Young Player"), [(25, 24, 1, 11, 9), (42, 28, 0.5, 10, 9)],
+    "cubarsi": [("Pau Cubarsi", "CB  ·  Best Young Player"),
                 "top-5% long balls  ·  anchored the high line"],
-    "olmo": [("Dani Olmo", "AM  ·  the pocket finder"), [(68, 38, 1, 11, 9), (78, 26, 0.6, 9, 8), (55, 42, 0.4, 10, 9)],
+    "olmo": [("Dani Olmo", "AM  ·  the pocket finder"),
              "2 knockout assists  ·  started the Final"],
 }
 
 
-def gallery_page(_: dict) -> Figure:
+def gallery_page(d: dict) -> Figure:
+    touches = d["touches"]
     fig = _new_page()
     _header(fig, "Some Of Their Key Players", active=4)
-    keys = ["rodri", "yamal", "oyarzabal", "simon", "cubarsi", "olmo"]
-    for i, k in enumerate(keys):
-        (name, role), spots, caption = HEAT_SPOTS[k]
+    for i, (k, ((name, role), caption)) in enumerate(GALLERY.items()):
         col, row = i % 3, i // 3
         x0, y0 = 0.045 + col * 0.325, 0.47 - row * 0.385
         _photo(fig, [x0, y0 + 0.145, 0.078, 0.14], f"{k}.jpg", circle=True,
@@ -491,11 +517,12 @@ def gallery_page(_: dict) -> Figure:
                  fontweight="bold", color=NAVY)
         fig.text(x0 + 0.095, y0 + 0.215, role, fontsize=7.8, color=GREY)
         ax = fig.add_axes([x0 + 0.095, y0, 0.165, 0.20])
-        charts.player_heatmap(ax, spots)
+        charts.player_heatmap(ax, touches[touches.player == k])
         fig.text(x0 + 0.13, y0 - 0.012, caption, fontsize=7.2, color=DARK)
-        fig.text(x0 + 0.045, y0 - 0.036, "Heatmap: modelled from role & match reports (est.)",
+        fig.text(x0 + 0.045, y0 - 0.036,
+                 f"Computed from {len(touches[touches.player == k])} touch events (modelled dataset)",
                  fontsize=5.8, color=GREY)
-    _footer(fig, "Player photos: Bryan Berlin, Wikimedia Commons, CC BY-SA 4.0 (WC26 semi-final & final)  ·  heatmaps are modelled, not tracking data")
+    _footer(fig, "Player photos: Bryan Berlin, Wikimedia Commons, CC BY-SA 4.0 (WC26 semi-final & final)  ·  heatmaps computed from the committed touch-event dataset")
     return fig
 
 

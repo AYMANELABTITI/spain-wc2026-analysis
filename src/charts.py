@@ -468,23 +468,28 @@ def goal_chain(ax: Axes, chain: pd.DataFrame) -> None:
                 color=SPAIN_RED, fontweight="bold", zorder=7)
 
 
-def player_heatmap(ax: Axes, spots: list[tuple[float, float, float, float, float]]) -> None:
-    """Sofascore-style touch heatmap: gaussian mixture on a green pitch.
+def _gauss_blur(grid: np.ndarray, sigma: float) -> np.ndarray:
+    """Separable gaussian blur (numpy only)."""
+    half = int(3 * sigma)
+    k = np.exp(-0.5 * (np.arange(-half, half + 1) / sigma) ** 2)
+    k /= k.sum()
+    blur_1d = lambda v: np.convolve(v, k, mode="same")
+    return np.apply_along_axis(blur_1d, 1, np.apply_along_axis(blur_1d, 0, grid))
 
-    spots: (x, y, weight, sigma_x, sigma_y) on a 105x68 pitch.
+
+def player_heatmap(ax: Axes, touches: pd.DataFrame) -> None:
+    """Sofascore-style heatmap COMPUTED from touch-event points: the points
+    are binned into a 2D histogram, then kernel-smoothed. No hand-drawn blobs.
     """
-    xs = np.linspace(0, 105, 140)
-    ys = np.linspace(0, 68, 92)
-    xx, yy = np.meshgrid(xs, ys)
-    dens = np.zeros_like(xx)
-    for (cx, cy, w, sx, sy) in spots:
-        dens += w * np.exp(-(((xx - cx) / sx) ** 2 + ((yy - cy) / sy) ** 2) / 2)
+    grid, _, _ = np.histogram2d(touches.y, touches.x, bins=[34, 52],
+                                range=[[0, 68], [0, 105]])
+    dens = _gauss_blur(grid, sigma=1.6)
     dens /= dens.max()
     cmap = LinearSegmentedColormap.from_list("touch", [
-        (0.0, (0, 0, 0, 0)), (0.35, (0.98, 0.85, 0.2, 0.55)),
-        (0.65, (0.95, 0.55, 0.1, 0.75)), (1.0, (0.82, 0.10, 0.10, 0.9))])
+        (0.0, (0, 0, 0, 0)), (0.30, (0.98, 0.85, 0.2, 0.55)),
+        (0.62, (0.95, 0.55, 0.1, 0.78)), (1.0, (0.82, 0.10, 0.10, 0.92))])
     ax.imshow(dens, extent=[0, 105, 0, 68], origin="lower", cmap=cmap,
-              zorder=2, aspect="equal")
+              zorder=2, aspect="equal", interpolation="bilinear")
     draw_pitch_h(ax, line_color=WHITE)
     ax.add_patch(Rectangle((0, 0), 105, 68, facecolor="#3F7C4B",
                            edgecolor="none", zorder=0))

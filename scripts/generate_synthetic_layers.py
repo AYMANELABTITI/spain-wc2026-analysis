@@ -30,3 +30,36 @@ df = pd.DataFrame({"x": x.round(1), "y": y.round(1), "outcome": outcome})
 df.to_csv(DATA / "high_regains.csv", index=False)
 print(f"wrote {len(df)} regains -> data/high_regains.csv "
       f"({(outcome=='shot').sum()} shots, {(outcome=='goal').sum()} goals)")
+
+# ----------------------------------------------------------------- touches
+# Per-player touch events for the gallery heatmaps. Mixture centres encode
+# each player's role (105x68 pitch, attacking ->); the heatmap chart then
+# computes a density from these points — nothing is drawn by hand.
+TOUCH_MODEL = {
+    "rodri": [(48, 34, .5, 13, 10), (60, 30, .3, 11, 9), (38, 40, .2, 10, 8)],
+    "yamal": [(78, 11, .45, 10, 6), (88, 20, .25, 7, 7), (60, 14, .2, 11, 7),
+              (70, 30, .1, 8, 8)],
+    "oyarzabal": [(88, 32, .4, 8, 8), (72, 22, .25, 10, 8), (80, 45, .2, 8, 7),
+                  (60, 30, .15, 9, 8)],
+    "simon": [(5, 34, .7, 4, 8), (14, 34, .3, 7, 11)],
+    "cubarsi": [(26, 23, .5, 10, 8), (40, 27, .3, 9, 8), (55, 30, .2, 8, 7)],
+    "olmo": [(68, 38, .35, 9, 8), (77, 26, .3, 8, 7), (58, 44, .2, 9, 8),
+             (85, 38, .15, 6, 6)],
+}
+
+rows = []
+for player, mix in TOUCH_MODEL.items():
+    n_pts = 420
+    weights = np.array([m[2] for m in mix])
+    weights /= weights.sum()
+    comp = rng.choice(len(mix), size=n_pts, p=weights)
+    for c in comp:
+        cx, cy, _, sx, sy = mix[c]
+        px = np.clip(rng.normal(cx, sx), 0.5, 104.5)
+        py = np.clip(rng.normal(cy, sy), 0.5, 67.5)
+        rows.append((player, round(px, 1), round(py, 1)))
+
+touches = pd.DataFrame(rows, columns=["player", "x", "y"])
+touches.to_csv(DATA / "touch_points.csv", index=False)
+print(f"wrote {len(touches)} touches -> data/touch_points.csv "
+      f"({len(TOUCH_MODEL)} players)")
