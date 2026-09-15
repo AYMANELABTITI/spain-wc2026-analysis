@@ -1,4 +1,8 @@
-"""Shared visual identity for the report: colors, typography, page geometry."""
+"""Shared visual identity for the report: FIFA World Cup 26 inspired theme.
+
+Palette logic — deep navy base with the tri-host accent colours
+(Canada red / Mexico green / USA blue) and trophy gold.
+"""
 
 from pathlib import Path
 
@@ -9,15 +13,24 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 OUTPUT_DIR = ROOT / "output"
 
-# ---------------------------------------------------------------- palette
-SPAIN_RED = "#AA151B"        # flag red — primary accent
-DEEP_RED = "#7A1017"         # header bands, dark accents
-GOLD = "#C9A227"             # flag gold — secondary accent
-DARK = "#22181A"             # body text
-GREY = "#8A8384"             # de-emphasised series / opponents
-LIGHT_GREY = "#E7E2E0"       # grid lines, empty bar tracks
-CREAM = "#FBF8F4"            # page background
+# ---------------------------------------------------------------- WC26 palette
+NAVY = "#0B1F3A"             # header/footer bands, dark base
+NAVY_DEEP = "#071426"        # title page gradient end
+WC_RED = "#D50032"           # Canada red — primary accent (and Spain highlight)
+WC_GREEN = "#007A33"         # Mexico green — secondary accent
+WC_BLUE = "#0057B8"          # USA blue — tertiary accent
+GOLD = "#C9A227"             # trophy gold
+DARK = "#1C2431"             # body text
+GREY = "#8A8F98"             # de-emphasised series / opponents
+LIGHT_GREY = "#E4E6EA"       # grid lines, empty bar tracks
+CREAM = "#F7F8FA"            # page background (cool off-white)
 WHITE = "#FFFFFF"
+
+TRI = [WC_RED, WC_GREEN, WC_BLUE]   # the host-nation stripe
+
+# Backwards-compatible aliases used across chart code
+SPAIN_RED = WC_RED
+DEEP_RED = NAVY
 
 # ---------------------------------------------------------------- page geometry (16:9)
 PAGE_W, PAGE_H = 13.333, 7.5   # inches

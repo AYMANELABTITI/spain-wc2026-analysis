@@ -20,6 +20,7 @@ def load_data() -> dict[str, pd.DataFrame]:
         "matches": pd.read_csv(DATA_DIR / "matches.csv"),
         "teams": pd.read_csv(DATA_DIR / "teams_comparison.csv"),
         "players": pd.read_csv(DATA_DIR / "players.csv"),
+        "profiles": pd.read_csv(DATA_DIR / "player_profiles.csv"),
     }
 
 

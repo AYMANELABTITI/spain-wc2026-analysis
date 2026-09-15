@@ -1,0 +1,19 @@
+﻿player,role_line,metric,value_label,percentile
+Rodri,DM - Golden Ball winner,Pass accuracy,91% (est.),96
+Rodri,DM - Golden Ball winner,Passes per 90,94 (est.),95
+Rodri,DM - Golden Ball winner,Ball recoveries per 90,7.1 (est.),88
+Lamine Yamal,RW - best dribbler at WC26,Dribbles per game,3.5 - best at WC26,99
+Lamine Yamal,RW - best dribbler at WC26,Assists,3,90
+Lamine Yamal,RW - best dribbler at WC26,Chances created per 90,2.6 (est.),92
+Mikel Oyarzabal,ST - Spain top scorer,Goals,5,95
+Mikel Oyarzabal,ST - Spain top scorer,xG per 90,0.62 (est.),90
+Mikel Oyarzabal,ST - Spain top scorer,Shots on target per 90,1.8 (est.),89
+Unai Simon,GK - Golden Glove winner,Clean sheets,7 of 8,99
+Unai Simon,GK - Golden Glove winner,Save percentage,92% (est.),97
+Unai Simon,GK - Golden Glove winner,Goals conceded,1 in 750 min,99
+Pau Cubarsi,CB - Best Young Player (19),Interceptions per 90,2.4 (est.),91
+Pau Cubarsi,CB - Best Young Player (19),Accurate long balls per 90,6.2 (est.),93
+Pau Cubarsi,CB - Best Young Player (19),Duels won,68% (est.),85
+Dani Olmo,AM - the space finder,Key passes per 90,2.2 (est.),88
+Dani Olmo,AM - the space finder,Progressive carries per 90,3.4 (est.),86
+Dani Olmo,AM - the space finder,Expected assists per 90,0.31 (est.),84

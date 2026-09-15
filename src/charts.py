@@ -3,8 +3,10 @@
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
+from matplotlib.patches import Circle, Rectangle
 
-from config import DARK, DEEP_RED, GOLD, GREY, LIGHT_GREY, SPAIN_RED, WHITE
+from config import (DARK, DEEP_RED, GOLD, GREY, LIGHT_GREY, NAVY, SPAIN_RED,
+                    WC_BLUE, WC_GREEN, WHITE)
 
 STAGE_SHORT = {
     "Group C": "GRP", "Round of 32": "R32", "Round of 16": "R16",
@@ -108,15 +110,15 @@ def scorer_spread(ax: Axes, players: pd.DataFrame) -> None:
     """Horizontal bars of goal involvements — the 'no single hero' story."""
     p = players[players.goals + players.assists > 0].sort_values(
         ["goals", "assists"]).reset_index(drop=True)
-    ax.barh(p.player, p.goals, color=SPAIN_RED, label="Goals", height=0.6)
+    ax.barh(p.player, p.goals, color=SPAIN_RED, label="Goals", height=0.55)
     ax.barh(p.player, p.assists, left=p.goals, color=GOLD, label="Assists",
-            height=0.6)
+            height=0.55)
     for i, row in p.iterrows():
         ax.text(row.goals + row.assists + 0.12, i, str(row.goals + row.assists),
-                va="center", fontsize=8, color=GREY)
+                va="center", fontsize=7.2, color=GREY)
     ax.set_xlim(0, p.goals.max() + p.assists.max() + 1)
-    ax.tick_params(axis="y", labelsize=8.2)
-    ax.legend(frameon=False, fontsize=8, loc="lower right")
+    ax.tick_params(axis="y", labelsize=7.2)
+    ax.legend(frameon=False, fontsize=7.5, loc="lower right")
 
 
 # ------------------------------------------------------------------ page 4
@@ -204,3 +206,85 @@ def radar_identity(ax: Axes, matches: pd.DataFrame, teams: pd.DataFrame) -> None
     ax.set_yticklabels([])
     ax.set_ylim(0, 1.05)
     ax.grid(color=LIGHT_GREY)
+
+
+# ------------------------------------------------------------------ players
+FINAL_XI = {  # 4-2-3-1 vs Argentina — (x, y) on a 100x100 vertical half-ish pitch
+    "Simon": (50, 6), "Porro": (85, 24), "Cubarsi": (63, 20),
+    "Laporte": (37, 20), "Cucurella": (15, 24), "Rodri": (60, 42),
+    "F. Ruiz": (40, 42), "Yamal": (84, 64), "Olmo": (50, 62),
+    "Baena": (16, 64), "Oyarzabal": (50, 84),
+}
+
+
+def formation_pitch(ax: Axes) -> None:
+    """Spain's 4-2-3-1 from the Final (unchanged from the semi-final)."""
+    ax.add_patch(Rectangle((0, 0), 100, 100, facecolor="#EDF3ED",
+                           edgecolor=GREY, lw=1))
+    ax.plot([0, 100], [50, 50], color=GREY, lw=0.8)
+    for y0 in (0, 84):  # penalty boxes
+        ax.add_patch(Rectangle((21, y0), 58, 16, fill=False, edgecolor=GREY, lw=0.8))
+    ax.add_patch(Circle((50, 50), 9.15, fill=False, edgecolor=GREY, lw=0.8))
+    for name, (x, y) in FINAL_XI.items():
+        color = GOLD if name == "Oyarzabal" else SPAIN_RED
+        ax.scatter(x, y, s=330, color=color, edgecolor=WHITE, lw=1.6, zorder=3)
+        ax.text(x, y - 7.5, name, ha="center", fontsize=7.3, fontweight="bold",
+                color=NAVY, zorder=3)
+    ax.set_xlim(-2, 102)
+    ax.set_ylim(-2, 102)
+    ax.set_aspect("equal")
+    ax.axis("off")
+
+
+def minutes_bars(ax: Axes, players: pd.DataFrame) -> None:
+    """Squad usage: minutes played (est.), starters of the Final highlighted."""
+    p = players.sort_values("minutes").reset_index(drop=True)
+    colors = [SPAIN_RED if s else LIGHT_GREY for s in p.starter_final]
+    edges = ["none" if s else GREY for s in p.starter_final]
+    ax.barh(p.player, p.minutes, color=colors, edgecolor=edges, lw=0.6, height=0.62)
+    ax.axvline(750, color=GOLD, lw=1.2, ls="--")
+    ax.text(738, 1.0, "every minute\n(750')", fontsize=6.8, color=GOLD,
+            ha="right", va="center")
+    for i, row in p.iterrows():
+        ax.text(row.minutes + 10, i, f"{row.minutes}'", va="center", fontsize=6.8,
+                color=GREY)
+    ax.set_xlim(0, 860)
+    ax.tick_params(axis="y", labelsize=7.4)
+    ax.set_xticks([0, 250, 500, 750])
+
+
+def contribution_scatter(ax: Axes, players: pd.DataFrame) -> None:
+    """Goal involvements per 90 vs minutes — who produced, who carried."""
+    p = players[players.minutes > 0].copy()
+    p["gi90"] = (p.goals + p.assists) / p.minutes * 90
+    for _, r in p.iterrows():
+        big = r.goals + r.assists >= 3
+        ax.scatter(r.minutes, r.gi90, s=110 if big else 55,
+                   color=SPAIN_RED if big else GREY, zorder=3,
+                   edgecolor=WHITE, lw=1)
+        if big or r.player in ("Ferran Torres", "Rodri"):
+            ax.annotate(r.player, (r.minutes, r.gi90), xytext=(0, 8),
+                        textcoords="offset points", ha="center", fontsize=7.2,
+                        fontweight="bold" if big else "normal", color=NAVY)
+    ax.set_xlabel("Minutes played (est.)", fontsize=8.5)
+    ax.set_ylabel("Goals + assists per 90", fontsize=8.5)
+    ax.grid(color=LIGHT_GREY, lw=0.8)
+    ax.set_ylim(-0.06, 1.2)
+
+
+def profile_panel(ax: Axes, prof: pd.DataFrame, accent: str) -> None:
+    """One player's card: 3 percentile bars vs tournament peers (est.)."""
+    rows = prof.reset_index(drop=True)
+    n = len(rows)
+    for i, r in rows.iterrows():
+        y = n - 1 - i
+        ax.barh(y, 100, color=LIGHT_GREY, height=0.34, zorder=1)
+        ax.barh(y, r.percentile, color=accent, height=0.34, zorder=2)
+        ax.text(0, y + 0.42, r.metric, fontsize=7.6, color=DARK, va="center")
+        ax.text(100, y + 0.42, r.value_label, fontsize=7.4, color=GREY,
+                va="center", ha="right")
+        ax.text(r.percentile - 2, y, f"{r.percentile}", fontsize=6.6,
+                color=WHITE, va="center", ha="right", fontweight="bold", zorder=3)
+    ax.set_xlim(0, 100)
+    ax.set_ylim(-0.55, n - 0.1)
+    ax.axis("off")

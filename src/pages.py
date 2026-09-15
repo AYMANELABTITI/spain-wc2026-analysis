@@ -9,10 +9,18 @@ from matplotlib.figure import Figure
 from matplotlib.patches import FancyBboxPatch
 
 import charts
-from config import (CREAM, DARK, DEEP_RED, DPI, GOLD, GREY, LIGHT_GREY,
-                    PAGE_H, PAGE_W, SERIF, SPAIN_RED, WHITE)
+from config import (CREAM, DARK, DEEP_RED, DPI, GOLD, GREY, LIGHT_GREY, NAVY,
+                    NAVY_DEEP, PAGE_H, PAGE_W, SERIF, SPAIN_RED, TRI, WHITE)
 
-SECTIONS = ["The Road", "In Possession", "Out of Possession", "Identity & Players"]
+SECTIONS = ["The Road", "In Possession", "Out of Possession", "The Squad", "Key Players"]
+
+
+def _tri_stripe(fig: Figure, y: float, h: float = 0.006) -> None:
+    """The WC26 host-nation stripe: Canada red / Mexico green / USA blue."""
+    for i, c in enumerate(TRI):
+        fig.patches.append(plt.Rectangle((i / 3, y), 1 / 3, h,
+                                         transform=fig.transFigure,
+                                         facecolor=c, zorder=3))
 
 
 # ------------------------------------------------------------------ furniture
@@ -22,20 +30,22 @@ def _new_page() -> Figure:
 def _header(fig: Figure, title: str, active: int | None = None) -> None:
     """Deep-red title band + section navigation, like the reference report."""
     fig.patches.append(plt.Rectangle((0, 0.925), 1, 0.075, transform=fig.transFigure,
-                                     facecolor=DEEP_RED, zorder=2))
+                                     facecolor=NAVY, zorder=2))
+    _tri_stripe(fig, 0.919)
     fig.text(0.035, 0.955, title, fontsize=19, family=SERIF, fontweight="bold",
              color=WHITE, va="center", zorder=3)
-    fig.text(0.965, 0.955, "ESP · WC26", fontsize=9, color=GOLD, va="center",
-             ha="right", family=SERIF, zorder=3)
+    fig.text(0.965, 0.955, "FIFA WORLD CUP 26™ · ESPAÑA", fontsize=8.5, color=GOLD,
+             va="center", ha="right", family=SERIF, zorder=3)
     if active is not None:
         for i, s in enumerate(SECTIONS):
-            fig.text(0.06 + i * 0.24, 0.895, s, fontsize=10.5, family=SERIF,
+            fig.text(0.05 + i * 0.19, 0.888, s, fontsize=10.5, family=SERIF,
                      color=SPAIN_RED if i == active else GREY,
                      fontweight="bold" if i == active else "normal")
 
 def _footer(fig: Figure, note: str) -> None:
     fig.patches.append(plt.Rectangle((0, 0), 1, 0.032, transform=fig.transFigure,
-                                     facecolor=DEEP_RED, zorder=2))
+                                     facecolor=NAVY, zorder=2))
+    _tri_stripe(fig, 0.032)
     fig.text(0.035, 0.016, note, fontsize=7, color=WHITE, va="center", zorder=3)
 
 def _chart_title(fig: Figure, x: float, y: float, rich: list[tuple[str, bool]],
@@ -74,28 +84,34 @@ def _stat_card(fig: Figure, x: float, y: float, w: float, h: float,
 # ------------------------------------------------------------------ pages
 def title_page(_: dict) -> Figure:
     fig = _new_page()
-    grad = np.linspace(0, 1, 512)[None, :]
+    grad = np.linspace(0, 1, 512)[:, None]
     ax = fig.add_axes([0, 0, 1, 1])
     ax.imshow(grad, aspect="auto", cmap=plt.cm.colors.LinearSegmentedColormap
-              .from_list("bg", ["#B3181F", "#4A0D11"]), extent=[0, 1, 0, 1])
+              .from_list("bg", [NAVY_DEEP, "#12305B"]), extent=[0, 1, 0, 1])
     ax.axis("off")
+    _tri_stripe(fig, 0.80, h=0.008)
+    fig.text(0.5, 0.845, "FIFA WORLD CUP 26™  ·  CANADA / MEXICO / USA",
+             fontsize=10.5, family=SERIF, color=GOLD, ha="center",
+             zorder=3)
     fig.text(0.5, 0.60, "Why Spain Won The 2026 World Cup",
-             fontsize=30, family=SERIF, fontweight="bold", color="#FDF6EE",
+             fontsize=30, family=SERIF, fontweight="bold", color="#F3F6FB",
              ha="center")
-    fig.text(0.5, 0.52, "A tournament told through data  ·  Canada / Mexico / USA 2026",
-             fontsize=12.5, family=SERIF, color=GOLD, ha="center")
-    stats = [("8", "matches"), ("7", "wins, 1 draw"), ("14 – 1", "goals for–against"),
-             ("7", "clean sheets")]
-    for i, (v, l) in enumerate(stats):
+    fig.text(0.5, 0.52, "A tournament told through data",
+             fontsize=13, family=SERIF, color="#9FB4D4", ha="center")
+    stats = [("8", "matches", TRI[0]), ("7", "wins, 1 draw", TRI[1]),
+             ("14 – 1", "goals for–against", GOLD), ("7", "clean sheets", TRI[2])]
+    for i, (v, l, c) in enumerate(stats):
         x = 0.245 + i * 0.17
-        fig.text(x, 0.36, v, fontsize=21, family=SERIF, fontweight="bold",
-                 color="#FDF6EE", ha="center")
-        fig.text(x, 0.315, l, fontsize=9.5, color="#E8B9BB", ha="center")
-    fig.text(0.5, 0.14, "CREATED BY", fontsize=9, color="#E8B9BB", ha="center")
+        fig.patches.append(plt.Rectangle((x - 0.055, 0.395), 0.11, 0.003,
+                                         transform=fig.transFigure, facecolor=c))
+        fig.text(x, 0.345, v, fontsize=21, family=SERIF, fontweight="bold",
+                 color="#F3F6FB", ha="center")
+        fig.text(x, 0.30, l, fontsize=9.5, color="#9FB4D4", ha="center")
+    fig.text(0.5, 0.14, "CREATED BY", fontsize=9, color="#9FB4D4", ha="center")
     fig.text(0.5, 0.11, "Aymane Labtiti", fontsize=11, family=SERIF,
-             color="#FDF6EE", ha="center")
+             color="#F3F6FB", ha="center")
     fig.text(0.5, 0.05, "Built end-to-end in Python  ·  pandas + matplotlib",
-             fontsize=8, color="#E8B9BB", ha="center")
+             fontsize=8, color="#9FB4D4", ha="center")
     return fig
 
 
@@ -151,10 +167,10 @@ def possession_page(d: dict) -> Figure:
     charts.xg_vs_goals(ax2, m)
     _source(fig, 0.50, 0.385, "Source compiled data :", " est. xG vs goals per match")
 
-    ax3 = fig.add_axes([0.73, 0.44, 0.24, 0.38])
-    _chart_title(fig, 0.85, 0.855, [("Nine scorers", True), (" — no single hero", False)])
+    ax3 = fig.add_axes([0.73, 0.42, 0.24, 0.40])
+    _chart_title(fig, 0.85, 0.855, [("11 players", True), (" with a goal or assist", False)])
     charts.scorer_spread(ax3, p)
-    _source(fig, 0.85, 0.385, "Source FIFA :", " goal involvements")
+    _source(fig, 0.85, 0.375, "Source FIFA :", " goal involvements (assists est.)")
 
     _commentary(fig, 0.05, 0.33,
         "Spain suffocated opponents with the ball before beating them with it. Possession never dipped "
@@ -165,8 +181,8 @@ def possession_page(d: dict) -> Figure:
         "The chance-creation engine was remarkably steady: roughly 2.2 expected goals per match, every "
         "match, regardless of opponent quality. Early wastefulness (0 goals from ~2.1 xG vs Cape Verde) "
         "corrected itself as the tournament progressed. And crucially, the load was shared: Oyarzabal's five "
-        "goals led the way, but nine different players contributed goals or assists — full-back Porro and "
-        "midfielder Merino chipping in from deep. Take away any one attacker and Spain still scores.", width=105)
+        "goals led the way, but eleven different players contributed a goal or an assist — full-back Porro "
+        "and midfielder Merino chipping in from deep. Take away any one attacker and Spain still scores.", width=105)
     _footer(fig, "Advanced metrics are estimates compiled from public match reports — see README for data provenance")
     return fig
 
@@ -208,10 +224,70 @@ def defence_page(d: dict) -> Figure:
     return fig
 
 
+def squad_page(d: dict) -> Figure:
+    p = d["players"]
+    fig = _new_page()
+    _header(fig, "The Squad : One XI, Sixteen Contributors", active=3)
+
+    ax1 = fig.add_axes([0.045, 0.12, 0.255, 0.70])
+    _chart_title(fig, 0.172, 0.855, [("The Final XI ", True), ("(4-2-3-1)", False)])
+    charts.formation_pitch(ax1)
+    _source(fig, 0.172, 0.095, "Source SI / beIN :", " unchanged from the semi-final")
+
+    ax2 = fig.add_axes([0.40, 0.16, 0.25, 0.66])
+    _chart_title(fig, 0.515, 0.855, [("Minutes", True), (" — a settled spine, a deep bench", False)],
+                 fontsize=9.8)
+    charts.minutes_bars(ax2, p)
+    _source(fig, 0.515, 0.10, "Source compiled data :", " est. minutes incl. extra time")
+
+    ax3 = fig.add_axes([0.72, 0.47, 0.25, 0.35])
+    _chart_title(fig, 0.845, 0.855, [("Production ", False), ("vs minutes played", True)])
+    charts.contribution_scatter(ax3, p)
+    _source(fig, 0.845, 0.40, "Source compiled data :", " goal involvements per 90")
+
+    _commentary(fig, 0.70, 0.345,
+        "De la Fuente found his best XI by the semi-final and never touched it again — the same "
+        "eleven started against France and Argentina. Around that settled spine, rotation was real: "
+        "sixteen players logged 250+ minutes.", width=52)
+    _commentary(fig, 0.70, 0.205,
+        "The scatter shows the two kinds of contributor: high-volume producers like Oyarzabal and "
+        "Yamal, and high-efficiency substitutes — Merino and Torres delivered a goal involvement "
+        "roughly every hour of pitch time, the definition of bench impact.", width=52)
+    _footer(fig, "Final XI: Simon; Porro, Cubarsi, Laporte, Cucurella; Rodri, F. Ruiz; Yamal, Olmo, Baena; Oyarzabal  ·  Coach: Luis de la Fuente")
+    return fig
+
+
+def profiles_page(d: dict) -> Figure:
+    prof = d["profiles"]
+    fig = _new_page()
+    _header(fig, "Key Players Under The Microscope", active=4)
+
+    order = ["Rodri", "Unai Simon", "Mikel Oyarzabal",
+             "Lamine Yamal", "Pau Cubarsi", "Dani Olmo"]
+    accents = {"Rodri": GOLD, "Unai Simon": GOLD, "Mikel Oyarzabal": SPAIN_RED,
+               "Lamine Yamal": SPAIN_RED, "Pau Cubarsi": GOLD, "Dani Olmo": SPAIN_RED}
+    for i, name in enumerate(order):
+        col, row = i % 3, i // 3
+        x0, y0 = 0.055 + col * 0.325, 0.50 - row * 0.36
+        rows = prof[prof.player == name]
+        fig.text(x0, y0 + 0.30, name, fontsize=13, family=SERIF,
+                 fontweight="bold", color=NAVY)
+        fig.text(x0, y0 + 0.272, rows.role_line.iloc[0], fontsize=8.2, color=GREY)
+        ax = fig.add_axes([x0, y0, 0.26, 0.24])
+        charts.profile_panel(ax, rows, accents[name])
+
+    fig.text(0.5, 0.085,
+             "Percentile bars rank each player against positional peers at WC26 "
+             "(estimates compiled from public reports — gold = individual award winner).",
+             fontsize=8, color=GREY, ha="center")
+    _footer(fig, "Awards: Golden Ball — Rodri  ·  Golden Glove — U. Simon  ·  Best Young Player — P. Cubarsi  ·  Yamal: 3.5 dribbles/game, best at WC26")
+    return fig
+
+
 def identity_page(d: dict) -> Figure:
     m, t = d["matches"], d["teams"]
     fig = _new_page()
-    _header(fig, "Identity, Key Men & Five Reasons Spain Won", active=3)
+    _header(fig, "Identity & Five Reasons Spain Won", active=None)
 
     ax1 = fig.add_axes([0.045, 0.40, 0.24, 0.42], polar=True)
     _chart_title(fig, 0.165, 0.855, [("Spain ", True), ("vs beaten rivals (avg)", False)])
@@ -230,7 +306,7 @@ def identity_page(d: dict) -> Figure:
 
     reasons = [
         ("1. Elite defence", "One goal conceded in eight games; est. xGA never above 1.1."),
-        ("2. Shared goals", "Nine scorers, four knockout game-winners from four different players."),
+        ("2. Shared goals", "Eleven players with a goal or assist; four knockout winners from four scorers."),
         ("3. Midfield control", "55%+ possession in every match, run by Golden Ball winner Rodri."),
         ("4. Squad depth", "Oyarzabal & Torres delivered while Yamal worked back from injury."),
         ("5. Big-game nerve", "Portugal, Belgium, France, Argentina beaten in succession."),
@@ -245,4 +321,5 @@ def identity_page(d: dict) -> Figure:
     return fig
 
 
-PAGES = [title_page, road_page, possession_page, defence_page, identity_page]
+PAGES = [title_page, road_page, possession_page, defence_page,
+         squad_page, profiles_page, identity_page]
