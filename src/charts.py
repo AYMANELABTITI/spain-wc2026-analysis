@@ -433,6 +433,89 @@ def ppda_bars(ax: Axes, teams: pd.DataFrame) -> None:
     ax.set_xlabel("PPDA (est.) — lower = more intense press", fontsize=7.6)
 
 
+# ------------------------------------------------------------------ england
+def england_route(ax: Axes, eng: pd.DataFrame) -> None:
+    """England's eight matches — the run that ended one game short of Spain."""
+    n = len(eng)
+    ys = np.arange(n)[::-1]
+    ax.vlines(0, -0.4, n - 0.6, color=LIGHT_GREY, lw=3, zorder=1)
+    res_color = {"W": WC_BLUE, "D": GREY, "L": SPAIN_RED}
+    for y, (_, m) in zip(ys, eng.iterrows()):
+        ax.scatter(0, y, s=150 if m.result == "L" else 110,
+                   color=res_color[m.result], zorder=3, edgecolor=WHITE,
+                   linewidth=1.5)
+        ax.text(0.09, y, f"{m.stage_short}  ·  {m.opponent}", va="center",
+                fontsize=9.2, fontweight="bold", color=DARK)
+        note = "" if pd.isna(m.note) else m.note
+        ax.text(0.09, y - 0.31, f"{m.gf}–{m.ga}   {note}", va="center",
+                fontsize=7.4, color=GREY)
+    ax.set_xlim(-0.08, 1.0)
+    ax.set_ylim(-0.6, n - 0.3)
+    ax.axis("off")
+
+
+def duo_dependency(ax: Axes) -> None:
+    """Where the goals come from: England's duo vs Spain's collective."""
+    rows = [("ENGLAND  ·  20 goals",
+             [("Kane 6", 6, WC_BLUE), ("Bellingham 7", 7, "#3E7BD6"),
+              ("others 7", 7, LIGHT_GREY)]),
+            ("SPAIN  ·  14 goals",
+             [("Oyarzabal 5", 5, SPAIN_RED), ("Porro 2", 2, "#E4536F"),
+              ("others 7", 7, GOLD)])]
+    for i, (team, parts) in enumerate(rows):
+        y = 1 - i
+        total = sum(v for _, v, _ in parts)
+        left = 0.0
+        for lbl, v, c in parts:
+            w = v / total
+            ax.barh(y, w, left=left, color=c, height=0.42,
+                    edgecolor=WHITE, lw=1.2)
+            txt_c = DARK if c in (LIGHT_GREY, GOLD) else WHITE
+            ax.text(left + w / 2, y, lbl, ha="center", va="center",
+                    fontsize=7.0, color=txt_c, fontweight="bold")
+            left += w
+        ax.text(0, y + 0.34, team, fontsize=8.2, color=NAVY,
+                fontweight="bold")
+    ax.text(0.65, 1.62, "65% from two men", fontsize=7.6, color=WC_BLUE,
+            fontweight="bold", ha="center")
+    ax.text(0.5, -0.62, "50% from two men — and 11 contributors in total",
+            fontsize=7.6, color=SPAIN_RED, fontweight="bold", ha="center")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(-0.9, 1.9)
+    ax.axis("off")
+
+
+def butterfly(ax: Axes, metrics: list[tuple[str, float, float, str, str, int]]) -> None:
+    """Head-to-head diverging bars: England (left, blue) vs Spain (right, red).
+
+    metrics rows: (label, eng_value, esp_value, eng_label, esp_label, winner)
+    winner: 0 = England side highlighted, 1 = Spain side.
+    """
+    n = len(metrics)
+    for i, (label, ev, sv, el, sl, winner) in enumerate(metrics):
+        y = n - 1 - i
+        scale = max(ev, sv) or 1
+        ax.barh(y, -0.92 * ev / scale, color=WC_BLUE,
+                alpha=1.0 if winner == 0 else 0.35, height=0.5)
+        ax.barh(y, 0.92 * sv / scale, color=SPAIN_RED,
+                alpha=1.0 if winner == 1 else 0.35, height=0.5)
+        ax.text(0, y + 0.42, label, ha="center", fontsize=7.8, color=DARK,
+                fontweight="bold")
+        ax.text(-0.97, y, el, ha="right", va="center", fontsize=7.6,
+                color=NAVY, fontweight="bold" if winner == 0 else "normal")
+        ax.text(0.97, y, sl, ha="left", va="center", fontsize=7.6,
+                color=SPAIN_RED if winner == 1 else GREY,
+                fontweight="bold" if winner == 1 else "normal")
+    ax.axvline(0, color=WHITE, lw=2)
+    ax.text(-0.55, n - 0.25, "ENGLAND", fontsize=9, color=WC_BLUE,
+            fontweight="bold", ha="center")
+    ax.text(0.55, n - 0.25, "SPAIN", fontsize=9, color=SPAIN_RED,
+            fontweight="bold", ha="center")
+    ax.set_xlim(-1.35, 1.35)
+    ax.set_ylim(-0.6, n + 0.1)
+    ax.axis("off")
+
+
 def profile_panel(ax: Axes, prof: pd.DataFrame, accent: str) -> None:
     """One player's card: 3 percentile bars vs tournament peers (est.)."""
     rows = prof.reset_index(drop=True)

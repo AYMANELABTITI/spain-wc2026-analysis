@@ -423,6 +423,51 @@ def profiles_page(d: dict) -> Figure:
     return fig
 
 
+def england_page(d: dict) -> Figure:
+    eng = d["england"]
+    fig = _new_page()
+    _header(fig, "The One That Got Away : England, The Champion Spain Never Met",
+            active=None)
+    fig.text(0.5, 0.885, "Third place  ·  the only heavyweight missing from Spain's route  ·  "
+             "eliminated by Argentina at 90+2 in the semi-final",
+             fontsize=10, family=SERIF, color=GREY, ha="center")
+
+    ax1 = fig.add_axes([0.03, 0.10, 0.27, 0.70])
+    _chart_title(fig, 0.165, 0.845, [("6W 1D 1L", True), (" — 20 scored, 12 conceded", False)])
+    charts.england_route(ax1, eng)
+    _source(fig, 0.165, 0.075, "Source FIFA / ESPN / Olympics.com :", " England's eight matches")
+
+    ax2 = fig.add_axes([0.36, 0.55, 0.29, 0.26])
+    _chart_title(fig, 0.505, 0.845, [("Two ways to build ", False), ("an attack", True)])
+    charts.duo_dependency(ax2)
+    _source(fig, 0.505, 0.525, "Source beIN / englandfootball.com :", " Kane 6 + Bellingham 7, first 6+6 duo in WC history")
+
+    ax3 = fig.add_axes([0.70, 0.42, 0.27, 0.40])
+    _chart_title(fig, 0.835, 0.845, [("Head to head ", True), ("by the numbers", False)])
+    charts.butterfly(ax3, [
+        ("Goals per match", 2.50, 1.75, "2.50", "1.75", 0),
+        ("Goals conceded per match", 1.50, 0.13, "1.50", "0.13", 1),
+        ("Clean sheets", 2, 7, "2", "7", 1),
+        ("Matches conceding 2+", 4, 0, "4", "0", 1),
+        ("Top-duo share of goals", 65, 50, "65%", "50%", 1),
+    ])
+    _source(fig, 0.835, 0.395, "Source compiled data :", " both teams, 8 matches each")
+
+    _commentary(fig, 0.36, 0.46,
+        "England were the tournament's heaviest scorers — 20 goals, more than Spain — powered by the "
+        "deadliest partnership a World Cup has ever seen: Kane and Bellingham became the first teammates "
+        "to reach six goals each in a single edition. On raw firepower, they were the one side that could "
+        "out-gun anyone, and their 6-4 bronze-final win over France showed it.", width=64)
+    _commentary(fig, 0.36, 0.30,
+        "But the numbers also explain why Spain would have been favourites in the final that never was. "
+        "England conceded 12 times and shipped two or more in half their games; Spain conceded once all "
+        "month. And England's goals ran through two men (65%), a dependency Spain's system is built to "
+        "break — Rodri screening Bellingham's arrivals, Cubarsi and Laporte isolating Kane, and a press "
+        "that starves the supply line. Firepower against a fortress: the fortress finished with the cup.", width=64)
+    _footer(fig, "England route: Croatia 4-2, Ghana 0-0, Panama 2-0, DR Congo 2-1, Mexico 3-2, Norway 2-1, Argentina 1-2, France 6-4  ·  Coach: Thomas Tuchel")
+    return fig
+
+
 def identity_page(d: dict) -> Figure:
     m, t = d["matches"], d["teams"]
     fig = _new_page()
@@ -461,4 +506,4 @@ def identity_page(d: dict) -> Figure:
 
 
 PAGES = [title_page, road_page, possession_page, structure_page, defence_page,
-         press_page, squad_page, profiles_page, identity_page]
+         press_page, squad_page, profiles_page, england_page, identity_page]

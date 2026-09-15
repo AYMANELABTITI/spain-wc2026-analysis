@@ -35,7 +35,9 @@ matplotlib pitches.
 7. **The Squad** — the Final 4-2-3-1 on a drawn pitch, squad minutes, production vs minutes scatter
 8. **Key Players Under The Microscope** — six individual profiles with percentile bars
    (Rodri, Simón, Oyarzabal, Yamal, Cubarsí, Olmo)
-9. **Identity & Conclusion** — team radar vs beaten rivals, award cards, five reasons Spain won
+9. **The One That Got Away** — England, the third-placed heavyweight Spain never met:
+   their route, the Kane–Bellingham duo dependency, and a butterfly head-to-head
+10. **Identity & Conclusion** — team radar vs beaten rivals, award cards, five reasons Spain won
 
 ## How to run
 
@@ -58,7 +60,8 @@ The PDF is written to `output/spain_wc2026_report.pdf`.
 │   ├── line_heights.csv       # defensive & midfield line height per match
 │   ├── goal_types.csv         # how the 14 goals were scored
 │   ├── pressing_zones.csv     # defensive actions per pitch zone (heatmap)
-│   └── high_regains.csv       # regain locations + outcomes (synthetic layer)
+│   ├── high_regains.csv       # regain locations + outcomes (synthetic layer)
+│   └── england_matches.csv    # England's route — the strongest side Spain avoided
 ├── scripts/
 │   └── generate_synthetic_layers.py  # seeded generator for the event-level layer
 ├── src/

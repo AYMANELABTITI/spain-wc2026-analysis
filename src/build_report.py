@@ -26,6 +26,7 @@ def load_data() -> dict[str, pd.DataFrame]:
         "goal_types": pd.read_csv(DATA_DIR / "goal_types.csv"),
         "press_zones": pd.read_csv(DATA_DIR / "pressing_zones.csv"),
         "regains": pd.read_csv(DATA_DIR / "high_regains.csv"),
+        "england": pd.read_csv(DATA_DIR / "england_matches.csv"),
     }
 
 
