@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
+from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Circle, Rectangle
 
 from config import (DARK, DEEP_RED, GOLD, GREY, LIGHT_GREY, NAVY, SPAIN_RED,
@@ -217,23 +218,44 @@ FINAL_XI = {  # 4-2-3-1 vs Argentina — (x, y) on a 100x100 vertical half-ish p
 }
 
 
-def formation_pitch(ax: Axes) -> None:
-    """Spain's 4-2-3-1 from the Final (unchanged from the semi-final)."""
-    ax.add_patch(Rectangle((0, 0), 100, 100, facecolor="#EDF3ED",
+def _pitch_100(ax: Axes, face: str = "#EDF3ED") -> None:
+    """Vertical 100x100 pitch canvas (attacking upward)."""
+    ax.add_patch(Rectangle((0, 0), 100, 100, facecolor=face,
                            edgecolor=GREY, lw=1))
     ax.plot([0, 100], [50, 50], color=GREY, lw=0.8)
     for y0 in (0, 84):  # penalty boxes
         ax.add_patch(Rectangle((21, y0), 58, 16, fill=False, edgecolor=GREY, lw=0.8))
     ax.add_patch(Circle((50, 50), 9.15, fill=False, edgecolor=GREY, lw=0.8))
+    ax.set_xlim(-2, 102)
+    ax.set_ylim(-2, 102)
+    ax.set_aspect("equal")
+    ax.axis("off")
+
+
+def draw_pitch_h(ax: Axes, line_color: str = GREY, face: str = "none") -> None:
+    """Horizontal 105x68 pitch (attacking to the right)."""
+    ax.add_patch(Rectangle((0, 0), 105, 68, facecolor=face,
+                           edgecolor=line_color, lw=1, zorder=4, fill=face != "none"))
+    ax.plot([52.5, 52.5], [0, 68], color=line_color, lw=0.8, zorder=4)
+    for x0 in (0, 105 - 16.5):  # penalty areas
+        ax.add_patch(Rectangle((x0, 13.85), 16.5, 40.3, fill=False,
+                               edgecolor=line_color, lw=0.8, zorder=4))
+    ax.add_patch(Circle((52.5, 34), 9.15, fill=False, edgecolor=line_color,
+                        lw=0.8, zorder=4))
+    ax.set_xlim(-2, 107)
+    ax.set_ylim(-2, 70)
+    ax.set_aspect("equal")
+    ax.axis("off")
+
+
+def formation_pitch(ax: Axes) -> None:
+    """Spain's 4-2-3-1 from the Final (unchanged from the semi-final)."""
+    _pitch_100(ax)
     for name, (x, y) in FINAL_XI.items():
         color = GOLD if name == "Oyarzabal" else SPAIN_RED
         ax.scatter(x, y, s=330, color=color, edgecolor=WHITE, lw=1.6, zorder=3)
         ax.text(x, y - 7.5, name, ha="center", fontsize=7.3, fontweight="bold",
                 color=NAVY, zorder=3)
-    ax.set_xlim(-2, 102)
-    ax.set_ylim(-2, 102)
-    ax.set_aspect("equal")
-    ax.axis("off")
 
 
 def minutes_bars(ax: Axes, players: pd.DataFrame) -> None:
@@ -270,6 +292,145 @@ def contribution_scatter(ax: Axes, players: pd.DataFrame) -> None:
     ax.set_ylabel("Goals + assists per 90", fontsize=8.5)
     ax.grid(color=LIGHT_GREY, lw=0.8)
     ax.set_ylim(-0.06, 1.2)
+
+
+# ------------------------------------------------------------------ structure
+def pass_network(ax: Axes, edges: pd.DataFrame) -> None:
+    """Passing network of the Final XI: edge width = combination volume,
+    node size = total pass involvement."""
+    _pitch_100(ax, face="#F1F4F8")
+    involvement = {}
+    for _, e in edges.iterrows():
+        for p in (e.p1, e.p2):
+            involvement[p] = involvement.get(p, 0) + e.passes
+    for _, e in edges.iterrows():
+        (x1, y1), (x2, y2) = FINAL_XI[e.p1], FINAL_XI[e.p2]
+        ax.plot([x1, x2], [y1, y2], color=SPAIN_RED,
+                lw=0.25 + e.passes / 11, alpha=0.30 + 0.5 * e.passes / 62,
+                zorder=2, solid_capstyle="round")
+    top = max(involvement.values())
+    for name, (x, y) in FINAL_XI.items():
+        inv = involvement.get(name, 0)
+        ax.scatter(x, y, s=120 + 340 * inv / top,
+                   color=NAVY if inv < 0.75 * top else SPAIN_RED,
+                   edgecolor=WHITE, lw=1.4, zorder=3)
+        ax.text(x, y - 7.2, name, ha="center", fontsize=6.8, fontweight="bold",
+                color=NAVY, zorder=3)
+
+
+def team_lines(ax: Axes, lines: pd.DataFrame) -> None:
+    """Average height of the defensive and midfield lines vs tournament norm."""
+    draw_pitch_h(ax, face="#F1F4F8")
+    d, m = lines.def_line.mean(), lines.mid_line.mean()
+    for x, c, lbl, ha in [(d, WC_GREEN, f"defensive line {d:.0f} m ", "right"),
+                          (m, SPAIN_RED, f" midfield line {m:.0f} m", "left")]:
+        ax.plot([x, x], [1, 67], color=c, lw=2.6, zorder=5)
+        ax.text(x, 70.5, lbl, ha=ha, fontsize=7.4, color=c, fontweight="bold")
+    for x, lbl, ha in [(34, "avg 34 m ", "right"), (48, " avg 48 m", "left")]:
+        ax.plot([x, x], [1, 67], color=GREY, lw=1.2, ls="--", zorder=5)
+        ax.text(x, -5.5, lbl, ha=ha, fontsize=6.6, color=GREY)
+    ax.text(41, -12, "tournament averages (est.)", ha="center", fontsize=6.2,
+            color=GREY)
+    ax.annotate("", xy=(d, 8), xytext=(34, 8),
+                arrowprops=dict(arrowstyle="->", color=WC_GREEN, lw=1.4))
+    ax.text((d + 34) / 2, 11, "+7 m", ha="center", fontsize=7.4,
+            color=WC_GREEN, fontweight="bold")
+    ax.set_ylim(-15, 76)
+
+
+def def_line_trend(ax: Axes, lines: pd.DataFrame) -> None:
+    """Defensive line height per match — discipline against the elite."""
+    ax.plot(lines.match_no, lines.def_line, color=WC_GREEN, lw=2.2,
+            marker="o", ms=5)
+    ax.axhline(34, color=GREY, lw=1, ls="--")
+    ax.text(1.0, 34.6, "tournament avg", fontsize=6.8, color=GREY)
+    for m in (7, 8):  # France, Argentina
+        row = lines[lines.match_no == m].iloc[0]
+        ax.annotate(row.stage, (m, row.def_line), xytext=(0, -13),
+                    textcoords="offset points", ha="center", fontsize=6.8,
+                    color=NAVY)
+    ax.set_xticks(lines.match_no)
+    ax.set_xticklabels(lines.stage, fontsize=6.6)
+    ax.set_ylim(30, 48)
+    ax.set_ylabel("Def. line height (m, est.)", fontsize=7.6)
+    ax.grid(axis="y", color=LIGHT_GREY, lw=0.8)
+
+
+def donut(ax: Axes, labels: list[str], values: list[float], colors: list[str],
+          center_top: str, center_sub: str) -> None:
+    """Generic donut with a headline number in the hole."""
+    wedges, _ = ax.pie(values, colors=colors, startangle=90,
+                       counterclock=False,
+                       wedgeprops=dict(width=0.40, edgecolor=WHITE, lw=1.5))
+    for w, lbl, v in zip(wedges, labels, values):
+        angle = np.deg2rad((w.theta1 + w.theta2) / 2)
+        x, y = 1.22 * np.cos(angle), 1.22 * np.sin(angle)
+        ax.text(x, y, f"{lbl}\n{v}", ha="center", va="center", fontsize=7.2,
+                color=DARK, linespacing=1.3)
+    ax.text(0, 0.10, center_top, ha="center", va="center", fontsize=15,
+            fontweight="bold", color=NAVY)
+    ax.text(0, -0.22, center_sub, ha="center", va="center", fontsize=7,
+            color=GREY)
+
+
+# ------------------------------------------------------------------ pressing
+def pressing_heatmap(ax: Axes, zones: pd.DataFrame) -> None:
+    """Zonal map of defensive actions (pressures + recoveries), est."""
+    grid = zones.pivot(index="y_bin", columns="x_bin", values="actions").values
+    cmap = LinearSegmentedColormap.from_list("press", ["#F5F0EE", SPAIN_RED])
+    xe = np.linspace(0, 105, grid.shape[1] + 1)
+    ye = np.linspace(0, 68, grid.shape[0] + 1)
+    ax.pcolormesh(xe, ye, grid, cmap=cmap, alpha=0.92, zorder=1,
+                  edgecolors=WHITE, lw=1.2)
+    for i in range(grid.shape[0]):
+        for j in range(grid.shape[1]):
+            frac = grid[i, j] / grid.max()
+            ax.text((xe[j] + xe[j + 1]) / 2, (ye[i] + ye[i + 1]) / 2,
+                    f"{grid[i, j]}", ha="center", va="center", fontsize=6.6,
+                    color=WHITE if frac > 0.55 else GREY, zorder=5,
+                    fontweight="bold" if frac > 0.55 else "normal")
+    draw_pitch_h(ax, line_color=NAVY)
+    ax.annotate("attacking direction", xy=(76, -6.5), xytext=(30, -6.5),
+                fontsize=6.8, color=GREY, annotation_clip=False,
+                arrowprops=dict(arrowstyle="->", color=GREY, lw=1))
+    ax.set_ylim(-10, 70)
+
+
+def high_regains_map(ax: Axes, regains: pd.DataFrame) -> None:
+    """Where Spain won the ball back high — and what happened next."""
+    draw_pitch_h(ax, face="#F1F4F8")
+    ax.plot([65, 65], [0, 68], color=GOLD, lw=1.4, ls="--", zorder=5)
+    ax.text(65, 70.5, "last 40 m", ha="center", fontsize=7, color=GOLD,
+            fontweight="bold")
+    styles = {"regain": dict(s=26, facecolor=WHITE, edgecolor=GREY, lw=0.9),
+              "shot": dict(s=48, facecolor=NAVY, edgecolor=WHITE, lw=0.8),
+              "goal": dict(s=85, facecolor=SPAIN_RED, edgecolor=WHITE, lw=1.2)}
+    for kind, st in styles.items():
+        sub = regains[regains.outcome == kind]
+        ax.scatter(sub.x, sub.y, zorder=6, **st)
+    for i, (kind, lbl) in enumerate([("regain", "high regain"),
+                                     ("shot", "shot within 15 s"),
+                                     ("goal", "goal within 15 s")]):
+        st = styles[kind]
+        ax.scatter(4 + i * 38, -6.5, zorder=6, clip_on=False, **st)
+        ax.text(7.5 + i * 38, -6.5, lbl, fontsize=6.8, color=DARK, va="center")
+    ax.set_ylim(-10, 74)
+
+
+def ppda_bars(ax: Axes, teams: pd.DataFrame) -> None:
+    """PPDA (passes allowed per defensive action) — lower = fiercer press."""
+    t = teams.sort_values("ppda", ascending=False).reset_index(drop=True)
+    colors = [SPAIN_RED if n == "Spain" else LIGHT_GREY for n in t.team]
+    ax.barh(t.team, t.ppda, color=colors, height=0.6,
+            edgecolor=[GREY if c == LIGHT_GREY else "none" for c in colors],
+            lw=0.6)
+    for i, row in t.iterrows():
+        ax.text(row.ppda + 0.15, i, f"{row.ppda}", va="center", fontsize=7.6,
+                color=NAVY if row.team == "Spain" else GREY,
+                fontweight="bold" if row.team == "Spain" else "normal")
+    ax.set_xlim(0, t.ppda.max() + 2.2)
+    ax.tick_params(axis="y", labelsize=7.6)
+    ax.set_xlabel("PPDA (est.) — lower = more intense press", fontsize=7.6)
 
 
 def profile_panel(ax: Axes, prof: pd.DataFrame, accent: str) -> None:

@@ -2,9 +2,13 @@
 
 A football analytics report on Spain's victorious FIFA World Cup 2026 campaign,
 **generated 100% programmatically in Python** (pandas + matplotlib). Running one
-script turns four small CSV datasets into a designed, magazine-style 7-page PDF
-report — charts, layout, typography and commentary included — themed after the
-World Cup 26 brand (deep navy + the Canada/Mexico/USA tri-colour stripe + trophy gold).
+script turns nine small CSV datasets into a designed, magazine-style 9-page PDF
+report — themed after the World Cup 26 brand (deep navy + the Canada/Mexico/USA
+tri-colour stripe + trophy gold) — with a deliberately wide visual vocabulary:
+zonal pressing **heatmaps**, a **passing-network graph**, pitch maps of **high
+regains** and **line heights**, **donut** charts, percentile **player cards**,
+radars, steppers, scatters and comparative bars, all drawn from scratch on
+matplotlib pitches.
 
 📄 **Output:** [`output/spain_wc2026_report.pdf`](output/spain_wc2026_report.pdf)
 
@@ -23,11 +27,15 @@ World Cup 26 brand (deep navy + the Canada/Mexico/USA tri-colour stripe + trophy
 1. **Title** — campaign at a glance
 2. **Tournament Landscape** — the road to the final, cumulative goals, attack–defence balance vs rivals
 3. **In Possession** — possession control, chance creation (xG) vs goals, 11 players with a goal involvement
-4. **Out of Possession** — the one-goal fortress, conceded-goals ranking, the Final's shot dominance
-5. **The Squad** — the Final 4-2-3-1 on a drawn pitch, squad minutes, production vs minutes scatter
-6. **Key Players Under The Microscope** — six individual profiles with percentile bars
+4. **Structure & Networks** — Final-XI passing network, defensive/midfield line heights on a pitch,
+   line discipline per match, goal-types donut
+5. **Out of Possession I** — the one-goal fortress, conceded-goals ranking, the Final's shot dominance
+6. **Out of Possession II — the press** — zonal heatmap of defensive actions, high-regains pitch map
+   (71 regains → 19 shots → 5 goals), PPDA comparison
+7. **The Squad** — the Final 4-2-3-1 on a drawn pitch, squad minutes, production vs minutes scatter
+8. **Key Players Under The Microscope** — six individual profiles with percentile bars
    (Rodri, Simón, Oyarzabal, Yamal, Cubarsí, Olmo)
-7. **Identity & Conclusion** — team radar vs beaten rivals, award cards, five reasons Spain won
+9. **Identity & Conclusion** — team radar vs beaten rivals, award cards, five reasons Spain won
 
 ## How to run
 
@@ -43,9 +51,16 @@ The PDF is written to `output/spain_wc2026_report.pdf`.
 ```
 ├── data/
 │   ├── matches.csv            # Spain's 8 matches: scores, scorers, per-match metrics
-│   ├── teams_comparison.csv   # Spain vs the rivals it eliminated
+│   ├── teams_comparison.csv   # Spain vs the rivals it eliminated (incl. PPDA)
 │   ├── players.csv            # squad: minutes, goals, assists, final starters, awards
-│   └── player_profiles.csv    # per-player metric profiles for the percentile cards
+│   ├── player_profiles.csv    # per-player metric profiles for the percentile cards
+│   ├── pass_network.csv       # Final-XI pass combinations for the network graph
+│   ├── line_heights.csv       # defensive & midfield line height per match
+│   ├── goal_types.csv         # how the 14 goals were scored
+│   ├── pressing_zones.csv     # defensive actions per pitch zone (heatmap)
+│   └── high_regains.csv       # regain locations + outcomes (synthetic layer)
+├── scripts/
+│   └── generate_synthetic_layers.py  # seeded generator for the event-level layer
 ├── src/
 │   ├── config.py              # visual identity: palette, typography, page geometry
 │   ├── charts.py              # reusable chart builders (each draws into an Axes)
@@ -68,6 +83,13 @@ The PDF is written to `output/spain_wc2026_report.pdf`.
   are *estimates* reconstructed from public match reports, clearly labelled "(est.)"
   in the report. The pipeline is data-source-agnostic: swap the CSVs for provider data
   (Opta, StatsBomb, FBref) and rebuild.
+
+## Assets
+
+`assets/wc26_emblem.png` is the official FIFA World Cup 26™ emblem, sourced from the
+[Wikipedia article's media](https://en.wikipedia.org/wiki/File:2026_FIFA_World_Cup_emblem.svg)
+and used here solely to identify the tournament in a non-commercial fan analysis.
+All trademarks belong to FIFA.
 
 ## Design
 

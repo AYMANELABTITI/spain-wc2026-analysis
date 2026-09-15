@@ -8,9 +8,12 @@ import pandas as pd
 from matplotlib.figure import Figure
 from matplotlib.patches import FancyBboxPatch
 
+import matplotlib.image as mpimg
+
 import charts
-from config import (CREAM, DARK, DEEP_RED, DPI, GOLD, GREY, LIGHT_GREY, NAVY,
-                    NAVY_DEEP, PAGE_H, PAGE_W, SERIF, SPAIN_RED, TRI, WHITE)
+from config import (ASSETS_DIR, CREAM, DARK, DEEP_RED, DPI, GOLD, GREY,
+                    LIGHT_GREY, NAVY, NAVY_DEEP, PAGE_H, PAGE_W, SERIF,
+                    SPAIN_RED, TRI, WHITE)
 
 SECTIONS = ["The Road", "In Possession", "Out of Possession", "The Squad", "Key Players"]
 
@@ -82,36 +85,96 @@ def _stat_card(fig: Figure, x: float, y: float, w: float, h: float,
 
 
 # ------------------------------------------------------------------ pages
+def _load_emblem() -> np.ndarray:
+    """Official WC26 emblem; near-black background made transparent so it
+    sits on the navy gradient."""
+    img = mpimg.imread(ASSETS_DIR / "wc26_emblem.png")
+    if img.shape[2] == 3:
+        img = np.dstack([img, np.ones(img.shape[:2], dtype=img.dtype)])
+    dark = img[..., :3].max(axis=2) < 0.10
+    img = img.copy()
+    img[dark, 3] = 0.0
+    return img
+
+
 def title_page(_: dict) -> Figure:
     fig = _new_page()
-    grad = np.linspace(0, 1, 512)[:, None]
+    # --- backdrop: vertical navy gradient + soft gold glow behind the trophy
     ax = fig.add_axes([0, 0, 1, 1])
-    ax.imshow(grad, aspect="auto", cmap=plt.cm.colors.LinearSegmentedColormap
-              .from_list("bg", [NAVY_DEEP, "#12305B"]), extent=[0, 1, 0, 1])
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
     ax.axis("off")
-    _tri_stripe(fig, 0.80, h=0.008)
-    fig.text(0.5, 0.845, "FIFA WORLD CUP 26™  ·  CANADA / MEXICO / USA",
-             fontsize=10.5, family=SERIF, color=GOLD, ha="center",
-             zorder=3)
-    fig.text(0.5, 0.60, "Why Spain Won The 2026 World Cup",
-             fontsize=30, family=SERIF, fontweight="bold", color="#F3F6FB",
+    grad = np.linspace(0, 1, 512)[:, None]
+    ax.imshow(grad, aspect="auto", cmap=plt.cm.colors.LinearSegmentedColormap
+              .from_list("bg", ["#132C52", NAVY_DEEP]), extent=[0, 1, 0, 1],
+              zorder=0)
+    yy, xx = np.mgrid[0:1:220j, 0:1:220j]
+    glow = np.exp(-(((xx - 0.5) * 1.55) ** 2 + ((yy - 0.76) * 2.6) ** 2) * 6)
+    ax.imshow(glow, extent=[0, 1, 0, 1], aspect="auto", zorder=1,
+              cmap=plt.cm.colors.LinearSegmentedColormap.from_list(
+                  "glow", [(0, 0, 0, 0), (0.79, 0.64, 0.15, 0.30)]))
+    # faint pitch line-art rising from the bottom edge
+    pitch_c = (1, 1, 1, 0.09)
+    theta = np.linspace(0, np.pi, 120)
+    ax.plot(0.5 + 0.16 * np.cos(theta), 0.20 * np.sin(theta) ** 1.4,
+            color=pitch_c, lw=1.6, zorder=1)
+    ax.plot([0.035, 0.965], [0.0035, 0.0035], color=pitch_c, lw=1.6, zorder=1)
+    ax.scatter([0.5], [0.012], s=14, color=pitch_c, zorder=1)
+
+    # --- emblem (official file, black matte keyed out)
+    emblem = _load_emblem()
+    h_img, w_img = emblem.shape[:2]
+    box_h = 0.335
+    box_w = box_h * (w_img / h_img) * (PAGE_H / PAGE_W)
+    ax_img = fig.add_axes([0.5 - box_w / 2, 0.575, box_w, box_h], zorder=2)
+    ax_img.imshow(emblem)
+    ax_img.axis("off")
+
+    # --- wordmark block
+    fig.text(0.5, 0.535, "C A N A D A   ·   M E X I C O   ·   U S A",
+             fontsize=9.5, color=GOLD, ha="center", family=SERIF)
+    fig.text(0.5, 0.44, "Why Spain Won The 2026 World Cup",
+             fontsize=31, family=SERIF, fontweight="bold", color="#F5F8FC",
              ha="center")
-    fig.text(0.5, 0.52, "A tournament told through data",
-             fontsize=13, family=SERIF, color="#9FB4D4", ha="center")
-    stats = [("8", "matches", TRI[0]), ("7", "wins, 1 draw", TRI[1]),
-             ("14 – 1", "goals for–against", GOLD), ("7", "clean sheets", TRI[2])]
+    fig.text(0.5, 0.385, "A  T O U R N A M E N T  T O L D  T H R O U G H  D A T A",
+             fontsize=10, color="#8FA6C9", ha="center")
+    # champions chip
+    chip_w = 0.185
+    fig.patches.append(FancyBboxPatch((0.5 - chip_w / 2, 0.318), chip_w, 0.038,
+                                      transform=fig.transFigure,
+                                      boxstyle="round,pad=0.006,rounding_size=0.012",
+                                      facecolor=SPAIN_RED, edgecolor="none",
+                                      zorder=3))
+    fig.text(0.5, 0.337, "C A M P E O N E S  D E L  M U N D O", fontsize=8.5,
+             color=WHITE, ha="center", va="center", fontweight="bold", zorder=4)
+
+    # --- stat cards
+    stats = [("8", "matches", TRI[0]), ("7", "wins  ·  1 draw", TRI[1]),
+             ("14 – 1", "goals for – against", GOLD), ("7", "clean sheets", TRI[2])]
+    cw, ch = 0.142, 0.115
     for i, (v, l, c) in enumerate(stats):
-        x = 0.245 + i * 0.17
-        fig.patches.append(plt.Rectangle((x - 0.055, 0.395), 0.11, 0.003,
-                                         transform=fig.transFigure, facecolor=c))
-        fig.text(x, 0.345, v, fontsize=21, family=SERIF, fontweight="bold",
-                 color="#F3F6FB", ha="center")
-        fig.text(x, 0.30, l, fontsize=9.5, color="#9FB4D4", ha="center")
-    fig.text(0.5, 0.14, "CREATED BY", fontsize=9, color="#9FB4D4", ha="center")
-    fig.text(0.5, 0.11, "Aymane Labtiti", fontsize=11, family=SERIF,
-             color="#F3F6FB", ha="center")
-    fig.text(0.5, 0.05, "Built end-to-end in Python  ·  pandas + matplotlib",
-             fontsize=8, color="#9FB4D4", ha="center")
+        x = 0.172 + i * 0.172
+        fig.patches.append(FancyBboxPatch((x, 0.155), cw, ch,
+                                          transform=fig.transFigure,
+                                          boxstyle="round,pad=0.004,rounding_size=0.01",
+                                          facecolor="#16345E", edgecolor="#28497A",
+                                          linewidth=0.8, zorder=2))
+        fig.patches.append(plt.Rectangle((x + 0.028, 0.155 + ch - 0.006),
+                                         cw - 0.056, 0.0045,
+                                         transform=fig.transFigure, facecolor=c,
+                                         zorder=3))
+        fig.text(x + cw / 2, 0.222, v, fontsize=19, family=SERIF,
+                 fontweight="bold", color="#F5F8FC", ha="center", zorder=3)
+        fig.text(x + cw / 2, 0.183, l, fontsize=8.5, color="#8FA6C9",
+                 ha="center", zorder=3)
+
+    # --- footer credits
+    fig.text(0.035, 0.055, "CREATED BY", fontsize=7.5, color="#8FA6C9")
+    fig.text(0.035, 0.028, "Aymane Labtiti", fontsize=10.5, family=SERIF,
+             color="#F5F8FC")
+    fig.text(0.965, 0.028, "Built end-to-end in Python  ·  pandas + matplotlib",
+             fontsize=8, color="#8FA6C9", ha="right")
+    _tri_stripe(fig, 0.0, h=0.008)
     return fig
 
 
@@ -224,6 +287,82 @@ def defence_page(d: dict) -> Figure:
     return fig
 
 
+def structure_page(d: dict) -> Figure:
+    fig = _new_page()
+    _header(fig, "In Possession : Structure, Networks & The High Block", active=1)
+
+    ax1 = fig.add_axes([0.035, 0.12, 0.27, 0.70])
+    _chart_title(fig, 0.17, 0.855, [("Passing network ", True), ("— everything through Rodri", False)],
+                 fontsize=9.6)
+    charts.pass_network(ax1, d["network"])
+    _source(fig, 0.17, 0.095, "Source compiled data :", " Final XI combinations (est.), node = involvement")
+
+    ax2 = fig.add_axes([0.345, 0.30, 0.30, 0.52])
+    _chart_title(fig, 0.50, 0.855, [("A block living ", False), ("7 m higher", True),
+                                    (" than the tournament", False)], fontsize=9.6)
+    charts.team_lines(ax2, d["lines"])
+    _source(fig, 0.50, 0.285, "Source compiled data :", " avg line heights from own goal (est.)")
+
+    ax3 = fig.add_axes([0.71, 0.52, 0.26, 0.30])
+    _chart_title(fig, 0.84, 0.855, [("Line discipline ", True), ("match by match", False)])
+    charts.def_line_trend(ax3, d["lines"])
+    _source(fig, 0.84, 0.455, "Source compiled data :", " def. line height per match (est.)")
+
+    ax4 = fig.add_axes([0.725, 0.115, 0.115, 0.27])
+    charts.donut(ax4, list(d["goal_types"].type), list(d["goal_types"]["count"]),
+                 [SPAIN_RED, GOLD, NAVY, GREY], "14", "goals")
+    _chart_title(fig, 0.845, 0.415, [("How the goals came", True)], fontsize=9)
+
+    _commentary(fig, 0.345, 0.22,
+        "The network shows a team wired through its No. 6: Rodri is the only node "
+        "touching every layer — back line, double pivot and front four. The strongest "
+        "links run down the flanks (Porro-Yamal, Cucurella-Baena), the launchpads for "
+        "Spain's wide overloads.", width=60, fontsize=8.2)
+    _commentary(fig, 0.345, 0.098,
+        "Structurally, the block was brave: a defensive line ~41 m out, seven metres "
+        "above the tournament norm — and disciplined, dropping only against the "
+        "fastest front lines (France, Argentina).", width=60, fontsize=8.2)
+    _footer(fig, "Line heights and pass volumes are estimates compiled from public match reports  ·  goal types: 8 open play, 3 counter-press, 2 set piece, 1 penalty")
+    return fig
+
+
+def press_page(d: dict) -> Figure:
+    fig = _new_page()
+    _header(fig, "Out Of Possession : Winning The Ball Where It Hurts", active=2)
+
+    ax1 = fig.add_axes([0.035, 0.32, 0.30, 0.50])
+    _chart_title(fig, 0.185, 0.855, [("Defensive actions ", True),
+                                     ("cluster past halfway", False)], fontsize=9.6)
+    charts.pressing_heatmap(ax1, d["press_zones"])
+    _source(fig, 0.185, 0.30, "Source compiled data :", " pressures + recoveries by zone, all 8 games (est.)")
+
+    ax2 = fig.add_axes([0.355, 0.32, 0.30, 0.50])
+    _chart_title(fig, 0.505, 0.855, [("71 high regains", True), (" — 19 became shots", False)],
+                 fontsize=9.6)
+    charts.high_regains_map(ax2, d["regains"])
+    _source(fig, 0.505, 0.30, "Source compiled data :", " regains in the last 40 m (illustrative layer)")
+
+    ax3 = fig.add_axes([0.72, 0.48, 0.25, 0.34])
+    _chart_title(fig, 0.845, 0.855, [("The fiercest press", True),
+                                     (" of the deep runners", False)], fontsize=9.6)
+    charts.ppda_bars(ax3, d["teams"])
+    _source(fig, 0.845, 0.41, "Source compiled data :", " passes allowed per defensive action (est.)")
+
+    _commentary(fig, 0.035, 0.235,
+        "The heat map gives the press its shape: the busiest zones sit just past halfway and in the "
+        "central corridor — Spain rarely defended deep because the ball rarely got that far. Olmo and "
+        "Oyarzabal screened the opponent's pivot while the winger and near-side eight jumped, funnelling "
+        "play into the crowded middle.", width=108)
+    _commentary(fig, 0.035, 0.135,
+        "And the press paid in goals, not just territory. Of 71 regains inside the opponent's final 40 m, "
+        "19 turned into a shot within fifteen seconds and five ended in the net — counter-press strikes "
+        "account for 3 of Spain's 14 goals. An estimated PPDA of 8.9 made it the most aggressive press of "
+        "any quarter-finalist, pairing a 65% possession game with instant ball-winning: the double grip "
+        "that defined this champion.", width=108)
+    _footer(fig, "Event locations are an illustrative synthetic layer (seeded generator in scripts/) consistent with the aggregate estimates — see README")
+    return fig
+
+
 def squad_page(d: dict) -> Figure:
     p = d["players"]
     fig = _new_page()
@@ -321,5 +460,5 @@ def identity_page(d: dict) -> Figure:
     return fig
 
 
-PAGES = [title_page, road_page, possession_page, defence_page,
-         squad_page, profiles_page, identity_page]
+PAGES = [title_page, road_page, possession_page, structure_page, defence_page,
+         press_page, squad_page, profiles_page, identity_page]

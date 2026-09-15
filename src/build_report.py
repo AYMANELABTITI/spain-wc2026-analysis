@@ -21,6 +21,11 @@ def load_data() -> dict[str, pd.DataFrame]:
         "teams": pd.read_csv(DATA_DIR / "teams_comparison.csv"),
         "players": pd.read_csv(DATA_DIR / "players.csv"),
         "profiles": pd.read_csv(DATA_DIR / "player_profiles.csv"),
+        "network": pd.read_csv(DATA_DIR / "pass_network.csv"),
+        "lines": pd.read_csv(DATA_DIR / "line_heights.csv"),
+        "goal_types": pd.read_csv(DATA_DIR / "goal_types.csv"),
+        "press_zones": pd.read_csv(DATA_DIR / "pressing_zones.csv"),
+        "regains": pd.read_csv(DATA_DIR / "high_regains.csv"),
     }
 
 

@@ -1,7 +1,7 @@
-team,matches,gf,ga,xg_for,xg_against,possession_avg,final_result
-Spain,8,14,1,17.3,5.0,65,Champions
-Argentina,8,13,5,13.9,7.4,58,Runners-up
-France,8,17,7,16.1,8.6,54,Semi-final
-Portugal,5,9,4,8.7,5.9,60,Round of 16
-Belgium,6,10,7,9.8,8.2,55,Quarter-final
-Uruguay,5,6,4,6.9,6.1,48,Round of 16
+team,matches,gf,ga,xg_for,xg_against,possession_avg,ppda,final_result
+Spain,8,14,1,17.3,5.0,65,8.9,Champions
+Argentina,8,13,5,13.9,7.4,58,11.5,Runners-up
+France,8,17,7,16.1,8.6,54,12.3,Semi-final
+Portugal,5,9,4,8.7,5.9,60,10.8,Round of 16
+Belgium,6,10,7,9.8,8.2,55,12.9,Quarter-final
+Uruguay,5,6,4,6.9,6.1,48,10.2,Round of 16

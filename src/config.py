@@ -11,6 +11,7 @@ import matplotlib as mpl
 # ---------------------------------------------------------------- paths
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
+ASSETS_DIR = ROOT / "assets"
 OUTPUT_DIR = ROOT / "output"
 
 # ---------------------------------------------------------------- WC26 palette
