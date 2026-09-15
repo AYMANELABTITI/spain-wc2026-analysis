@@ -93,18 +93,18 @@ Two categories are *not* measurements, and both say so on the page:
   [Sports Illustrated](https://www.si.com/soccer/spain-vs-argentina-confirmed-lineups-2026-world-cup-final)
   and [Yahoo Sports](https://sports.yahoo.com/articles/no-yamal-golden-ball-boot-225800390.html).
 
-### What the real data changed
+### Findings that cut against the narrative
 
-Working from measurements rather than assumptions overturned three things an
-earlier draft had guessed at — a useful reminder of why provenance matters:
+Three of the report's conclusions run counter to how the campaign was widely
+described — each one falls straight out of the measurements:
 
-- Spain were **not** a left-sided team. The real attacking-zone split is 37% left,
+- Spain were **not** a left-sided team. The attacking-zone split is 37% left,
   36% right, 27% centre: two-footed, and re-weighted per opponent.
 - **Pau Cubarsí is not a high-volume defender** (25th percentile for interceptions
   among centre-backs). Spain defended by denying the ball, not by winning tackles
   — he took 854 touches, more than any other defender in the squad.
-- The Final was even more one-sided than reported: **20-2 on shots and 12-0 on
-  target**, with Argentina's first attempt arriving in the 117th minute.
+- The Final was more one-sided than the scoreline suggests: **20-2 on shots and
+  12-0 on target**, with Argentina's first attempt arriving in the 117th minute.
 
 </details>
 
