@@ -29,15 +29,20 @@ matplotlib pitches.
 3. **In Possession** — possession control, chance creation (xG) vs goals, 11 players with a goal involvement
 4. **Structure & Networks** — Final-XI passing network, defensive/midfield line heights on a pitch,
    line discipline per match, goal-types donut
-5. **Out of Possession I** — the one-goal fortress, conceded-goals ranking, the Final's shot dominance
-6. **Out of Possession II — the press** — zonal heatmap of defensive actions, high-regains pitch map
+5. **Goal DNA** — six goal build-up patterns drawn as pass-chain mini pitches, plus a real
+   celebration photo
+6. **Out of Possession I** — the one-goal fortress, conceded-goals ranking, the Final's shot dominance
+7. **Out of Possession II — the press** — zonal heatmap of defensive actions, high-regains pitch map
    (71 regains → 19 shots → 5 goals), PPDA comparison
-7. **The Squad** — the Final 4-2-3-1 on a drawn pitch, squad minutes, production vs minutes scatter
-8. **Key Players Under The Microscope** — six individual profiles with percentile bars
-   (Rodri, Simón, Oyarzabal, Yamal, Cubarsí, Olmo)
-9. **The One That Got Away** — England, the third-placed heavyweight Spain never met:
-   their route, the Kane–Bellingham duo dependency, and a butterfly head-to-head
-10. **Identity & Conclusion** — team radar vs beaten rivals, award cards, five reasons Spain won
+8. **Organisation On The Pitch** — three tactic-board reconstructions (3-2-5 build, curve press,
+   5-second counter-press) alongside real match photos
+9. **The Squad** — the Final 4-2-3-1 on a drawn pitch, squad minutes, production vs minutes scatter
+10. **Key Players Under The Microscope** — six individual profiles with percentile bars
+    (Rodri, Simón, Oyarzabal, Yamal, Cubarsí, Olmo)
+11. **Key Players Gallery** — real player photos (CC-licensed) with modelled positional heatmaps
+12. **The One That Got Away** — England, the third-placed heavyweight Spain never met:
+    their route, the Kane–Bellingham duo dependency, and a butterfly head-to-head
+13. **Identity & Conclusion** — team radar vs beaten rivals, award cards, five reasons Spain won
 
 ## How to run
 
@@ -93,6 +98,13 @@ The PDF is written to `output/spain_wc2026_report.pdf`.
 [Wikipedia article's media](https://en.wikipedia.org/wiki/File:2026_FIFA_World_Cup_emblem.svg)
 and used here solely to identify the tournament in a non-commercial fan analysis.
 All trademarks belong to FIFA.
+
+`assets/photos/` contains photographs taken at the WC26 semi-final and final by
+**Bryan Berlin**, published on
+[Wikimedia Commons](https://commons.wikimedia.org/w/index.php?search=Argentina+v+Spain+19+July+2026)
+under **CC BY-SA 4.0** (player portraits are the cropped versions used by the
+players' Wikipedia articles). Tactic boards and heatmaps are original drawings —
+reconstructions and models, not tracking data, and labelled as such in the report.
 
 ## Design
 

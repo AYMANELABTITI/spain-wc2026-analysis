@@ -218,14 +218,14 @@ FINAL_XI = {  # 4-2-3-1 vs Argentina — (x, y) on a 100x100 vertical half-ish p
 }
 
 
-def _pitch_100(ax: Axes, face: str = "#EDF3ED") -> None:
+def _pitch_100(ax: Axes, face: str = "#EDF3ED", line: str = GREY) -> None:
     """Vertical 100x100 pitch canvas (attacking upward)."""
     ax.add_patch(Rectangle((0, 0), 100, 100, facecolor=face,
-                           edgecolor=GREY, lw=1))
-    ax.plot([0, 100], [50, 50], color=GREY, lw=0.8)
+                           edgecolor=line, lw=1))
+    ax.plot([0, 100], [50, 50], color=line, lw=0.8)
     for y0 in (0, 84):  # penalty boxes
-        ax.add_patch(Rectangle((21, y0), 58, 16, fill=False, edgecolor=GREY, lw=0.8))
-    ax.add_patch(Circle((50, 50), 9.15, fill=False, edgecolor=GREY, lw=0.8))
+        ax.add_patch(Rectangle((21, y0), 58, 16, fill=False, edgecolor=line, lw=0.8))
+    ax.add_patch(Circle((50, 50), 9.15, fill=False, edgecolor=line, lw=0.8))
     ax.set_xlim(-2, 102)
     ax.set_ylim(-2, 102)
     ax.set_aspect("equal")
@@ -431,6 +431,145 @@ def ppda_bars(ax: Axes, teams: pd.DataFrame) -> None:
     ax.set_xlim(0, t.ppda.max() + 2.2)
     ax.tick_params(axis="y", labelsize=7.6)
     ax.set_xlabel("PPDA (est.) — lower = more intense press", fontsize=7.6)
+
+
+# ------------------------------------------------------------------ goal DNA
+def goal_chain(ax: Axes, chain: pd.DataFrame) -> None:
+    """One goal's build-up on a mini pitch: numbered nodes, pass/dribble
+    links, red arrow for the strike (illustrative reconstruction)."""
+    draw_pitch_h(ax, face="#F1F4F8")
+    nodes = chain.reset_index(drop=True)
+    for i in range(len(nodes) - 1):
+        a, b = nodes.iloc[i], nodes.iloc[i + 1]
+        style = dict(color=DARK, lw=1.3)
+        if a.action == "dribble":
+            style = dict(color=DARK, lw=1.2, ls=(0, (2.5, 2.5)))
+        elif a.action == "cross":
+            style = dict(color=GOLD, lw=1.6)
+        ax.annotate("", xy=(b.x, b.y), xytext=(a.x, a.y), zorder=5,
+                    arrowprops=dict(arrowstyle="->", **style))
+    for i, n in nodes.iterrows():
+        if n.action == "regain":
+            ax.scatter(n.x, n.y, s=120, marker="p", color=GOLD,
+                       edgecolor=WHITE, lw=1, zorder=6)
+        else:
+            ax.scatter(n.x, n.y, s=110, color=SPAIN_RED, edgecolor=WHITE,
+                       lw=1, zorder=6)
+            ax.text(n.x, n.y, str(i + 1), ha="center", va="center",
+                    fontsize=5.5, color=WHITE, fontweight="bold", zorder=7)
+        lbl = "regain" if n.action == "regain" else n.player
+        ax.text(n.x, n.y - 6.5, lbl, ha="center", fontsize=5.6, color=NAVY,
+                zorder=7)
+    last = nodes.iloc[-1]
+    ax.annotate("", xy=(104.2, 34), xytext=(last.x, last.y), zorder=6,
+                arrowprops=dict(arrowstyle="->", color=SPAIN_RED, lw=2))
+    if last.action == "pen":
+        ax.text(last.x, last.y + 5.5, "PEN", ha="center", fontsize=6,
+                color=SPAIN_RED, fontweight="bold", zorder=7)
+
+
+def player_heatmap(ax: Axes, spots: list[tuple[float, float, float, float, float]]) -> None:
+    """Sofascore-style touch heatmap: gaussian mixture on a green pitch.
+
+    spots: (x, y, weight, sigma_x, sigma_y) on a 105x68 pitch.
+    """
+    xs = np.linspace(0, 105, 140)
+    ys = np.linspace(0, 68, 92)
+    xx, yy = np.meshgrid(xs, ys)
+    dens = np.zeros_like(xx)
+    for (cx, cy, w, sx, sy) in spots:
+        dens += w * np.exp(-(((xx - cx) / sx) ** 2 + ((yy - cy) / sy) ** 2) / 2)
+    dens /= dens.max()
+    cmap = LinearSegmentedColormap.from_list("touch", [
+        (0.0, (0, 0, 0, 0)), (0.35, (0.98, 0.85, 0.2, 0.55)),
+        (0.65, (0.95, 0.55, 0.1, 0.75)), (1.0, (0.82, 0.10, 0.10, 0.9))])
+    ax.imshow(dens, extent=[0, 105, 0, 68], origin="lower", cmap=cmap,
+              zorder=2, aspect="equal")
+    draw_pitch_h(ax, line_color=WHITE)
+    ax.add_patch(Rectangle((0, 0), 105, 68, facecolor="#3F7C4B",
+                           edgecolor="none", zorder=0))
+
+
+# ------------------------------------------------------------------ tactic boards
+def _board(ax: Axes) -> None:
+    _pitch_100(ax, face="#F4F7F4")
+
+
+def board_build(ax: Axes) -> None:
+    """The 3-2-5 build shape: Cucurella releases high, Porro tucks."""
+    _board(ax)
+    ax.add_patch(Rectangle((4, 52), 32, 36, facecolor=SPAIN_RED, alpha=0.10,
+                           edgecolor=SPAIN_RED, lw=0.8, ls="--", zorder=2))
+    ax.text(20, 90.5, "left overload", ha="center", fontsize=6.2,
+            color=SPAIN_RED, fontweight="bold")
+    spain = {"Simon": (50, 4), "Laporte": (36, 18), "Cubarsi": (64, 18),
+             "Porro": (79, 26), "F. Ruiz": (40, 38), "Rodri": (58, 38),
+             "Yamal": (86, 66), "Olmo": (58, 62), "Oyarzabal": (50, 79),
+             "Baena": (30, 66), "Cucurella": (13, 60)}
+    for name, (x, y) in spain.items():
+        ax.scatter(x, y, s=190, color=SPAIN_RED, edgecolor=WHITE, lw=1.2,
+                   zorder=5)
+        ax.text(x, y - 5.6, name, ha="center", fontsize=5.4, color=NAVY,
+                fontweight="bold", zorder=5)
+    for (x, y) in [(35, 52), (48, 50), (62, 52), (75, 54), (42, 66), (58, 68)]:
+        ax.scatter(x, y, s=110, color=GREY, alpha=0.55, zorder=4)
+    ax.annotate("", xy=(14, 55), xytext=(20, 30), zorder=5,
+                arrowprops=dict(arrowstyle="->", color=SPAIN_RED, lw=1.6))
+    ax.annotate("", xy=(77, 28), xytext=(86, 20), zorder=5,
+                arrowprops=dict(arrowstyle="->", color=NAVY, lw=1.4))
+
+
+def board_press(ax: Axes) -> None:
+    """The 4-4-2 curve press: show the touchline, spring the trap."""
+    _board(ax)
+    ax.add_patch(Rectangle((70, 68), 29, 26, facecolor=GOLD, alpha=0.18,
+                           edgecolor=GOLD, lw=0.9, ls="--", zorder=2))
+    ax.text(84.5, 96.5, "the trap", ha="center", fontsize=6.2, color="#9A7B14",
+            fontweight="bold")
+    opp = {"GK": (50, 95), "CB": (37, 86), "CB ": (63, 86), "RB": (85, 80),
+           "LB": (15, 80), "DM": (46, 73), "DM ": (60, 73)}
+    for name, (x, y) in opp.items():
+        ax.scatter(x, y, s=150, color=GREY, edgecolor=WHITE, lw=1, zorder=4)
+        ax.text(x, y + 4.4, name.strip(), ha="center", fontsize=5.2,
+                color=GREY, zorder=4)
+    spain = {"Oyarzabal": (44, 87), "Olmo": (57, 79), "Yamal": (76, 83),
+             "Baena": (24, 76), "F. Ruiz": (38, 64), "Rodri": (56, 62),
+             "Porro": (82, 60), "Cucurella": (18, 58)}
+    for name, (x, y) in spain.items():
+        ax.scatter(x, y, s=190, color=SPAIN_RED, edgecolor=WHITE, lw=1.2,
+                   zorder=5)
+        ax.text(x, y - 5.6, name, ha="center", fontsize=5.4, color=NAVY,
+                fontweight="bold", zorder=5)
+    ax.annotate("", xy=(46, 92), xytext=(38, 84), zorder=6,  # curved 9 run
+                arrowprops=dict(arrowstyle="->", color=SPAIN_RED, lw=1.6,
+                                connectionstyle="arc3,rad=-0.4"))
+    ax.annotate("", xy=(80, 81), xytext=(74, 76), zorder=6,
+                arrowprops=dict(arrowstyle="->", color=SPAIN_RED, lw=1.6))
+    ax.annotate("", xy=(60, 71), xytext=(57, 64), zorder=6,
+                arrowprops=dict(arrowstyle="->", color=SPAIN_RED, lw=1.6))
+
+
+def board_counterpress(ax: Axes) -> None:
+    """Five seconds after losing it: four players collapse on the ball."""
+    _board(ax)
+    loss = (58, 62)
+    ax.add_patch(Circle(loss, 16, fill=False, edgecolor=GOLD, lw=1.4,
+                        ls="--", zorder=3))
+    ax.scatter(*loss, s=200, marker="X", color=GREY, edgecolor=WHITE,
+               lw=1, zorder=5)
+    ax.text(loss[0], loss[1] - 6.5, "ball lost", ha="center", fontsize=5.8,
+            color=GREY, zorder=5)
+    for (x, y) in [(45, 72), (70, 72), (48, 50), (72, 52)]:
+        ax.scatter(x, y, s=190, color=SPAIN_RED, edgecolor=WHITE, lw=1.2,
+                   zorder=5)
+        dx, dy = loss[0] - x, loss[1] - y
+        ax.annotate("", xy=(x + dx * 0.62, y + dy * 0.62), xytext=(x, y),
+                    zorder=6, arrowprops=dict(arrowstyle="->", color=SPAIN_RED,
+                                              lw=1.7))
+    ax.text(58, 82.5, "4 men inside 5 seconds", ha="center", fontsize=6.2,
+            color=SPAIN_RED, fontweight="bold")
+    ax.text(58, 42, "escape routes closed\n71 high regains followed",
+            ha="center", fontsize=5.8, color=NAVY)
 
 
 # ------------------------------------------------------------------ england

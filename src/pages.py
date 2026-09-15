@@ -363,6 +363,142 @@ def press_page(d: dict) -> Figure:
     return fig
 
 
+def _photo(fig: Figure, box: list[float], path: str, circle: bool = False,
+           border: str = GOLD) -> None:
+    """Place a photo; optionally cropped to a circle with a coloured ring."""
+    img = mpimg.imread(ASSETS_DIR / "photos" / path)
+    ax = fig.add_axes(box, zorder=3)
+    if circle:
+        h, w = img.shape[:2]
+        s = min(h, w)
+        img = img[(h - s) // 2:(h + s) // 2, (w - s) // 2:(w + s) // 2]
+        im = ax.imshow(img)
+        clip = plt.Circle((0.5, 0.5), 0.5, transform=ax.transAxes)
+        im.set_clip_path(clip)
+        ax.add_patch(plt.Circle((0.5, 0.5), 0.492, transform=ax.transAxes,
+                                fill=False, edgecolor=border, lw=2))
+    else:
+        ax.imshow(img)
+    ax.axis("off")
+
+
+GOAL_TITLES = [
+    "4-0 Saudi Arabia  ·  wide overload",
+    "1-0 Uruguay  ·  switch & cut inside",
+    "3-0 Austria  ·  counter-press strike",
+    "2-0 France  ·  regain to far post",
+    "2-0 France  ·  Yamal wins the pen",
+    "1-0 Argentina  ·  the patient kill, 106'",
+]
+
+
+def goal_dna_page(d: dict) -> Figure:
+    chains = d["chains"]
+    fig = _new_page()
+    _header(fig, "Goal DNA : The Build-Up Patterns Behind The Title", active=1)
+
+    for gid in range(1, 7):
+        col, row = (gid - 1) % 3, (gid - 1) // 3
+        x0, y0 = 0.03 + col * 0.215, 0.475 - row * 0.36
+        fig.text(x0 + 0.1, y0 + 0.315, GOAL_TITLES[gid - 1], fontsize=8,
+                 color=NAVY, ha="center", fontweight="bold")
+        ax = fig.add_axes([x0, y0, 0.2, 0.30])
+        charts.goal_chain(ax, chains[chains.goal_id == gid])
+
+    _photo(fig, [0.70, 0.50, 0.27, 0.32], "celebration.jpg")
+    fig.text(0.835, 0.475, "Yamal on top of the pile — semi-final, Dallas",
+             fontsize=7.2, color=GREY, ha="center")
+    _source(fig, 0.78, 0.448, "Photo :", " B. Berlin, Wikimedia Commons, CC BY-SA 4.0")
+
+    _commentary(fig, 0.70, 0.40,
+        "Six goals, four signatures. The wide overload (flank triangle, "
+        "cutback); the switch to the weak side; the counter-press strike "
+        "within seconds of a regain; and, when nothing came early, the "
+        "patient kill — the Final winner arrived after a sequence that "
+        "crossed the pitch twice before Cucurella's cutback found Torres.", width=48)
+    _commentary(fig, 0.70, 0.21,
+        "Note who keeps appearing: Yamal in three of the six chains "
+        "(scorer, creator, penalty-winner), and a full-back or wing-back "
+        "involved in five. Spain's goals were systemic, not soloist.", width=48)
+    _footer(fig, "Chains are illustrative reconstructions from match reports & highlights — pass counts abridged  ·  Legend: solid = pass, dashed = dribble, gold = cross, red = strike")
+    return fig
+
+
+def organisation_page(_: dict) -> Figure:
+    fig = _new_page()
+    _header(fig, "Organisation On The Pitch : Three Snapshots", active=2)
+
+    boards = [(charts.board_build, "IN POSSESSION — the 3-2-5 build",
+               "Cucurella releases high while Porro tucks into a back three; "
+               "the front five overload the left."),
+              (charts.board_press, "OUT OF POSSESSION — the curve press",
+               "Oyarzabal's curved run hides the centre; play is shown to "
+               "the touchline, where the trap springs."),
+              (charts.board_counterpress, "TRANSITION — the 5-second rule",
+               "Lose it, and the nearest four collapse on the ball — the "
+               "engine behind 71 high regains.")]
+    for i, (draw, title, sub) in enumerate(boards):
+        x0 = 0.035 + i * 0.225
+        fig.text(x0 + 0.1, 0.845, title, fontsize=8.2, color=NAVY,
+                 ha="center", fontweight="bold")
+        ax = fig.add_axes([x0, 0.42, 0.2, 0.40])
+        draw(ax)
+        _commentary(fig, x0 + 0.005, 0.40, sub, width=42, fontsize=7.4)
+
+    _photo(fig, [0.725, 0.55, 0.245, 0.27], "startingxi.jpg")
+    fig.text(0.8475, 0.525, "The XI before the semi-final vs France",
+             fontsize=7.2, color=GREY, ha="center")
+    _photo(fig, [0.725, 0.175, 0.245, 0.27], "huddle.jpg")
+    fig.text(0.8475, 0.15, "The huddle before the Final, MetLife Stadium",
+             fontsize=7.2, color=GREY, ha="center")
+
+    _commentary(fig, 0.035, 0.24,
+        "Three pictures of the same idea: control territory. With the ball Spain build a 3-2-5 that pins "
+        "opponents in their own half; without it the front two curve their runs to make the pitch small; "
+        "and in the moment between, the counter-press turns danger into the team's best chance-creation "
+        "engine. Every phase is a territorial argument — and Spain won it in all eight matches.", width=92)
+    _footer(fig, "Boards are tactical reconstructions from match reports & broadcast analysis  ·  Photos: Bryan Berlin, Wikimedia Commons, CC BY-SA 4.0")
+    return fig
+
+
+HEAT_SPOTS = {
+    "rodri": [("Rodri", "DM  ·  Golden Ball"), [(48, 34, 1, 14, 12), (62, 30, 0.5, 12, 10)],
+              "91% pass accuracy  ·  the tempo dictator"],
+    "yamal": [("Lamine Yamal", "RW  ·  19 years old"), [(76, 12, 1, 12, 8), (60, 18, 0.5, 12, 9), (88, 22, 0.6, 8, 8)],
+              "3.5 dribbles/game, best at WC26  ·  3 assists"],
+    "oyarzabal": [("Mikel Oyarzabal", "ST  ·  top scorer"), [(88, 34, 1, 9, 9), (70, 24, 0.5, 11, 9)],
+                  "5 goals  ·  scored in 4 different matches"],
+    "simon": [("Unai Simon", "GK  ·  Golden Glove"), [(6, 34, 1, 6, 9), (16, 34, 0.35, 8, 12)],
+              "7 clean sheets  ·  1 goal against in 750'"],
+    "cubarsi": [("Pau Cubarsi", "CB  ·  Best Young Player"), [(25, 24, 1, 11, 9), (42, 28, 0.5, 10, 9)],
+                "top-5% long balls  ·  anchored the high line"],
+    "olmo": [("Dani Olmo", "AM  ·  the pocket finder"), [(68, 38, 1, 11, 9), (78, 26, 0.6, 9, 8), (55, 42, 0.4, 10, 9)],
+             "2 knockout assists  ·  started the Final"],
+}
+
+
+def gallery_page(_: dict) -> Figure:
+    fig = _new_page()
+    _header(fig, "Some Of Their Key Players", active=4)
+    keys = ["rodri", "yamal", "oyarzabal", "simon", "cubarsi", "olmo"]
+    for i, k in enumerate(keys):
+        (name, role), spots, caption = HEAT_SPOTS[k]
+        col, row = i % 3, i // 3
+        x0, y0 = 0.045 + col * 0.325, 0.47 - row * 0.385
+        _photo(fig, [x0, y0 + 0.145, 0.078, 0.14], f"{k}.jpg", circle=True,
+               border=GOLD if k in ("rodri", "simon", "cubarsi") else SPAIN_RED)
+        fig.text(x0 + 0.095, y0 + 0.245, name, fontsize=11.5, family=SERIF,
+                 fontweight="bold", color=NAVY)
+        fig.text(x0 + 0.095, y0 + 0.215, role, fontsize=7.8, color=GREY)
+        ax = fig.add_axes([x0 + 0.095, y0, 0.165, 0.20])
+        charts.player_heatmap(ax, spots)
+        fig.text(x0 + 0.13, y0 - 0.012, caption, fontsize=7.2, color=DARK)
+        fig.text(x0 + 0.045, y0 - 0.036, "Heatmap: modelled from role & match reports (est.)",
+                 fontsize=5.8, color=GREY)
+    _footer(fig, "Player photos: Bryan Berlin, Wikimedia Commons, CC BY-SA 4.0 (WC26 semi-final & final)  ·  heatmaps are modelled, not tracking data")
+    return fig
+
+
 def squad_page(d: dict) -> Figure:
     p = d["players"]
     fig = _new_page()
@@ -505,5 +641,6 @@ def identity_page(d: dict) -> Figure:
     return fig
 
 
-PAGES = [title_page, road_page, possession_page, structure_page, defence_page,
-         press_page, squad_page, profiles_page, england_page, identity_page]
+PAGES = [title_page, road_page, possession_page, structure_page, goal_dna_page,
+         defence_page, press_page, organisation_page, squad_page, profiles_page,
+         gallery_page, england_page, identity_page]
