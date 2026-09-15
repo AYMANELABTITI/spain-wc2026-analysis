@@ -518,10 +518,12 @@ def gallery_page(d: dict) -> Figure:
         fig.text(x0 + 0.095, y0 + 0.215, role, fontsize=7.8, color=GREY)
         ax = fig.add_axes([x0 + 0.095, y0, 0.165, 0.20])
         charts.player_heatmap(ax, mine)
-        fig.text(x0 + 0.13, y0 - 0.012, caption, fontsize=7.0, color=DARK)
-        fig.text(x0 + 0.095, y0 - 0.036,
+        pitch_cx = x0 + 0.095 + 0.165 / 2
+        fig.text(pitch_cx, y0 - 0.012, caption, fontsize=6.8, color=DARK,
+                 ha="center")
+        fig.text(pitch_cx, y0 - 0.034,
                  f"Heatmap computed from {len(mine)} real touches (FotMob match heatmaps)",
-                 fontsize=5.8, color=GREY)
+                 fontsize=5.6, color=GREY, ha="center")
     _footer(fig, "Player photos: Bryan Berlin, Wikimedia Commons, CC BY-SA 4.0 (WC26 semi-final & final)  ·  heatmaps built from 7,724 real touch coordinates")
     return fig
 
@@ -543,7 +545,7 @@ def final_micro_page(d: dict) -> Figure:
     ax2 = fig.add_axes([0.39, 0.46, 0.27, 0.355])
     _chart_title(fig, 0.525, 0.845, [("The xG race ", True), ("— one-way traffic", False)])
     charts.xg_race(ax2, shots)
-    _source(fig, 0.525, 0.415, "Source FotMob :", " cumulative xG, 120 minutes")
+    _source(fig, 0.525, 0.378, "Source FotMob :", " cumulative xG, 120 minutes")
 
     ax3 = fig.add_axes([0.715, 0.46, 0.255, 0.355])
     _chart_title(fig, 0.845, 0.845, [("Shots per ", False), ("15-minute window", True)])
