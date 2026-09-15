@@ -424,23 +424,6 @@ def goal_dna_page(d: dict) -> Figure:
     return fig
 
 
-def _action_photo(fig: Figure, box: list[float], path: str, caption: str,
-                  ellipse: tuple[float, float, float, float] | None = None) -> None:
-    """In-match photo with an analyst-style highlight ellipse (image-fraction
-    coordinates) and a caption underneath."""
-    img = mpimg.imread(ASSETS_DIR / "photos" / path)
-    ax = fig.add_axes(box, zorder=3)
-    ax.imshow(img)
-    if ellipse:
-        h, w = img.shape[:2]
-        fx, fy, fw, fh = ellipse
-        ax.add_patch(Ellipse((fx * w, fy * h), fw * w, fh * h, fill=False,
-                             edgecolor="#FFD34D", lw=2.2))
-    ax.axis("off")
-    fig.text(box[0] + box[2] / 2, box[1] - 0.028, caption, fontsize=7.0,
-             color=GREY, ha="center")
-
-
 def organisation_page(_: dict) -> Figure:
     fig = _new_page()
     _header(fig, "Organisation On The Pitch : Three Principles", active=2)
@@ -455,36 +438,34 @@ def organisation_page(_: dict) -> Figure:
         ax = fig.add_axes([x0, 0.44, 0.2, 0.38])
         draw(ax)
 
-    shots = [("rodri_action.jpg",
-              "Rodri fires the first pass of another attack — the Final",
-              (0.50, 0.85, 0.72, 0.10)),
-             ("cucurella_action.jpg",
-              "Cucurella releasing into the left overload — semi-final",
-              (0.44, 0.90, 0.60, 0.09)),
-             ("yamal_action.jpg",
-              "Yamal kills a switch of play in mid-air — semi-final",
-              (0.46, 0.86, 0.52, 0.12))]
-    for i, (p, cap, ell) in enumerate(shots):
-        _action_photo(fig, [0.045 + i * 0.225, 0.095, 0.19, 0.30], p, cap, ell)
-    fig.text(0.35, 0.033 + 0.014, "", fontsize=1, color=GREY)
+    cams = [(charts.cam_build, "The camera view: the overload forms far side"),
+            (charts.cam_press, "The camera view: the 9 curves, the trap waits"),
+            (charts.cam_counter, "The camera view: four shirts, five seconds")]
+    for i, (draw, cap) in enumerate(cams):
+        ax = fig.add_axes([0.035 + i * 0.225, 0.075, 0.2, 0.33])
+        draw(ax)
+        fig.text(0.135 + i * 0.225, 0.052, cap, fontsize=6.8, color=GREY,
+                 ha="center")
 
     _commentary(fig, 0.725, 0.80,
-        "Three boards, one idea: control territory. With the ball, "
-        "Spain build a 3-2-5 that pins opponents in their own half — "
-        "Cucurella releases while Porro tucks in.", width=44, fontsize=8.2)
-    _commentary(fig, 0.725, 0.63,
-        "Without it, Oyarzabal's curved run hides the centre and shows "
-        "the touchline, where the trap springs shut.", width=44, fontsize=8.2)
-    _commentary(fig, 0.725, 0.50,
-        "And in the moment between, the nearest four collapse on the "
-        "ball inside five seconds — the engine behind 71 high regains.", width=44,
+        "Three principles, each shown twice: the analyst's plan view "
+        "on top, and the same moment through a virtual tactical "
+        "camera below — the broadcast angle, reconstructed in code.", width=44,
         fontsize=8.2)
-    _commentary(fig, 0.725, 0.36,
-        "Below, the principles in the flesh: the first pass, the "
-        "release, and the touch that turns a switch of play into "
-        "danger. Every phase is a territorial argument — Spain won "
+    _commentary(fig, 0.725, 0.645,
+        "With the ball, Spain build a 3-2-5 that pins opponents in "
+        "their own half — Cucurella releases while Porro tucks in.", width=44,
+        fontsize=8.2)
+    _commentary(fig, 0.725, 0.525,
+        "Without it, Oyarzabal's curved run hides the centre and "
+        "shows the touchline, where the trap springs shut on the "
+        "ringed full-back.", width=44, fontsize=8.2)
+    _commentary(fig, 0.725, 0.385,
+        "And in the moment between, the nearest four collapse on the "
+        "ball inside five seconds — the engine behind 71 high "
+        "regains. Every phase is a territorial argument; Spain won "
         "it in all eight matches.", width=44, fontsize=8.2)
-    _footer(fig, "Boards are tactical reconstructions from match reports & broadcast analysis  ·  In-match photos: Bryan Berlin, Wikimedia Commons, CC BY-SA 4.0")
+    _footer(fig, "Plan boards and tactical-camera frames are reconstructions from match reports & broadcast analysis — rendered entirely in matplotlib")
     return fig
 
 
@@ -523,6 +504,81 @@ def gallery_page(d: dict) -> Figure:
                  f"Computed from {len(touches[touches.player == k])} touch events (modelled dataset)",
                  fontsize=5.8, color=GREY)
     _footer(fig, "Player photos: Bryan Berlin, Wikimedia Commons, CC BY-SA 4.0 (WC26 semi-final & final)  ·  heatmaps computed from the committed touch-event dataset")
+    return fig
+
+
+def final_micro_page(d: dict) -> Figure:
+    shots = d["final_shots"]
+    fig = _new_page()
+    _header(fig, "The Final Under The Microscope : Spain 1-0 Argentina (aet)",
+            active=None)
+    fig.text(0.5, 0.885, "MetLife Stadium, July 19 2026  ·  shot-by-shot layer "
+             "(est.) consistent with the reported 20-3 / 8-1 / 2.4-0.2 aggregates",
+             fontsize=9.5, family=SERIF, color=GREY, ha="center")
+
+    ax1 = fig.add_axes([0.035, 0.40, 0.30, 0.42])
+    _chart_title(fig, 0.185, 0.845, [("Every shot ", True), ("of the Final", False)])
+    charts.final_shot_map(ax1, shots)
+    _source(fig, 0.185, 0.375, "Source compiled data :", " shot locations est. from match reports")
+
+    ax2 = fig.add_axes([0.40, 0.44, 0.28, 0.375])
+    _chart_title(fig, 0.54, 0.845, [("The xG race ", True), ("— one-way traffic", False)])
+    charts.xg_race(ax2, shots)
+    _source(fig, 0.54, 0.375, "Source compiled data :", " cumulative est. xG, 120 minutes")
+
+    ax3 = fig.add_axes([0.735, 0.44, 0.235, 0.375])
+    _chart_title(fig, 0.85, 0.845, [("Shots per ", False), ("15-minute window", True)])
+    charts.shots_by_window(ax3, shots)
+    _source(fig, 0.85, 0.375, "Source compiled data :", " shot volume by window")
+
+    _commentary(fig, 0.035, 0.29,
+        "The map shows a siege: Spain's twenty attempts ring the Argentine box, eight on target, while "
+        "Argentina managed three shots in 120 minutes — one on target, none after the 78th. The xG race "
+        "tells the same story as a line that only ever climbs in red: by full time Spain had banked "
+        "roughly 2.0 expected goals to Argentina's 0.2, football's version of total control without reward.", width=108)
+    _commentary(fig, 0.035, 0.185,
+        "Then the dam broke twice in thirteen minutes: Enzo Fernandez's second yellow in stoppage time "
+        "left the champions a man down, and in the 106th minute Ferran Torres finished the move the whole "
+        "final had been building toward. The window chart shows why it felt inevitable — Spain out-shot "
+        "Argentina in every single 15-minute segment of the match.", width=108)
+    _footer(fig, "Verified aggregates: CBS / ESPN (20-3 shots, Torres 106', Fernandez sent off 90+3)  ·  per-shot detail is an estimated layer, seeded generator in scripts/")
+    return fig
+
+
+def context_page(d: dict) -> Figure:
+    hist, players = d["history"], d["players"]
+    fig = _new_page()
+    _header(fig, "A Champion In Context : History Says This Was Special",
+            active=None)
+
+    ax1 = fig.add_axes([0.05, 0.42, 0.40, 0.38])
+    _chart_title(fig, 0.25, 0.845, [("The stingiest champion ", True),
+                                    ("of the modern era", False)])
+    charts.champions_ga(ax1, hist)
+    _source(fig, 0.25, 0.365, "Source FIFA archives :", " goals conceded by each World Cup winner")
+
+    ax2 = fig.add_axes([0.53, 0.42, 0.29, 0.38])
+    _chart_title(fig, 0.675, 0.845, [("Two generations, ", False), ("one core", True)])
+    charts.age_minutes(ax2, players)
+    _source(fig, 0.675, 0.345, "Source compiled data :", " age at the Final vs minutes played (est.)")
+
+    avg_age = (players.age * players.minutes).sum() / players.minutes.sum()
+    _stat_card(fig, 0.865, 0.62, 0.115, 0.14, f"{avg_age:.1f}",
+               "minutes-weighted\naverage age", SPAIN_RED)
+    _stat_card(fig, 0.865, 0.44, 0.115, 0.14, "19", "age of Cubarsi & Yamal\n— both starters", GOLD)
+
+    _commentary(fig, 0.05, 0.29,
+        "One goal conceded is not just this tournament's best defence — it is the best defensive campaign "
+        "by any World Cup winner in the modern era, and Spain did it across eight matches where every "
+        "champion before them played seven. Italy 2006 and Spain 2010, the previous benchmarks, conceded "
+        "two; the last two champions before 2026 conceded six and eight.", width=108)
+    _commentary(fig, 0.05, 0.19,
+        "The squad structure explains why this may only be the beginning. The minutes were carried by two "
+        "generations at once: a prime core aged 26-30 (Rodri, Oyarzabal, Simon, Cucurella) and a teenage "
+        "spine — Cubarsi and Yamal, both 19, both starters in the Final. A minutes-weighted average age "
+        "of ~27 with the two youngest players locked into the XI is the profile of a team built to defend "
+        "this title in 2030.", width=108)
+    _footer(fig, "Champions' records: FIFA tournament archives (2006-2022 winners each played 7 matches; the expanded 2026 format required 8)")
     return fig
 
 
@@ -669,5 +725,6 @@ def identity_page(d: dict) -> Figure:
 
 
 PAGES = [title_page, road_page, possession_page, structure_page, goal_dna_page,
-         defence_page, press_page, organisation_page, squad_page, profiles_page,
-         gallery_page, england_page, identity_page]
+         defence_page, press_page, organisation_page, final_micro_page,
+         squad_page, profiles_page, gallery_page, england_page, context_page,
+         identity_page]

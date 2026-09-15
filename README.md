@@ -34,15 +34,21 @@ matplotlib pitches.
 6. **Out of Possession I** — the one-goal fortress, conceded-goals ranking, the Final's shot dominance
 7. **Out of Possession II — the press** — zonal heatmap of defensive actions, high-regains pitch map
    (71 regains → 19 shots → 5 goals), PPDA comparison
-8. **Organisation On The Pitch** — three tactic-board reconstructions (3-2-5 build, curve press,
-   5-second counter-press) alongside real match photos
-9. **The Squad** — the Final 4-2-3-1 on a drawn pitch, squad minutes, production vs minutes scatter
-10. **Key Players Under The Microscope** — six individual profiles with percentile bars
+8. **Organisation On The Pitch** — each principle shown twice: analyst plan boards on top and
+   **virtual tactical-camera frames** below (a perspective-projected broadcast view rendered in
+   matplotlib: grass stripes, depth-scaled players, highlight rings, shaded traps)
+9. **The Final Under The Microscope** — shot map with xG-sized markers, the cumulative xG race
+   with the red card and the 106' winner annotated, shots per 15-minute window
+10. **The Squad** — the Final 4-2-3-1 on a drawn pitch, squad minutes, production vs minutes scatter
+11. **Key Players Under The Microscope** — six individual profiles with percentile bars
     (Rodri, Simón, Oyarzabal, Yamal, Cubarsí, Olmo)
-11. **Key Players Gallery** — real player photos (CC-licensed) with modelled positional heatmaps
-12. **The One That Got Away** — England, the third-placed heavyweight Spain never met:
+12. **Key Players Gallery** — real player photos (CC-licensed) with heatmaps computed from
+    touch-point data
+13. **The One That Got Away** — England, the third-placed heavyweight Spain never met:
     their route, the Kane–Bellingham duo dependency, and a butterfly head-to-head
-13. **Identity & Conclusion** — team radar vs beaten rivals, award cards, five reasons Spain won
+14. **A Champion In Context** — goals conceded by every World Cup winner 2006–2026
+    (Spain's 1 is the modern-era record), and the two-generation age/minutes structure
+15. **Identity & Conclusion** — team radar vs beaten rivals, award cards, five reasons Spain won
 
 ## How to run
 
@@ -91,6 +97,15 @@ The PDF is written to `output/spain_wc2026_report.pdf`.
   are *estimates* reconstructed from public match reports, clearly labelled "(est.)"
   in the report. The pipeline is data-source-agnostic: swap the CSVs for provider data
   (Opta, StatsBomb, FBref) and rebuild.
+
+## Plugging in real API data
+
+`scripts/fetch_api_football.py` pulls Spain's real WC26 fixtures and match
+statistics from [API-Football](https://www.api-football.com/) (see their
+[World Cup 2026 data guide](https://www.api-football.com/news/post/fifa-world-cup-2026-guide-to-using-data-with-api-sports)).
+With a free API key in `API_FOOTBALL_KEY`, it caches raw JSON under `data/api/`
+and writes `data/matches_api.csv` for diffing against the estimated layer — the
+report pipeline itself never needs to change.
 
 ## Assets
 

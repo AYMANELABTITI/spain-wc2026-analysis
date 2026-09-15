@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.colors import LinearSegmentedColormap
-from matplotlib.patches import Circle, Rectangle
+from matplotlib.patches import Circle, Ellipse, Polygon, Rectangle
 
 from config import (DARK, DEEP_RED, GOLD, GREY, LIGHT_GREY, NAVY, SPAIN_RED,
                     WC_BLUE, WC_GREEN, WHITE)
@@ -575,6 +575,268 @@ def board_counterpress(ax: Axes) -> None:
             color=SPAIN_RED, fontweight="bold")
     ax.text(58, 42, "escape routes closed\n71 high regains followed",
             ha="center", fontsize=5.8, color=NAVY)
+
+
+# ------------------------------------------------------------------ tactical cam
+def _cam(x: float, y: float) -> tuple[float, float, float]:
+    """Project pitch coords (x: 0-105 length, y: 0-68 width; y=0 near
+    touchline) into a broadcast tactical-camera view. Returns screen x, y
+    and a depth scale factor."""
+    t = y / 68
+    sy = 0.085 + 0.72 * t ** 0.9
+    scale = 1.0 - 0.42 * t
+    sx = 0.5 + ((x - 52.5) / 105) * scale * 0.97
+    return sx, sy, scale
+
+
+def _cam_line(ax: Axes, pts: list[tuple[float, float]], **kw) -> None:
+    proj = [_cam(x, y) for x, y in pts]
+    ax.plot([p[0] for p in proj], [p[1] for p in proj], **kw)
+
+
+def _cam_poly(ax: Axes, pts: list[tuple[float, float]], **kw) -> None:
+    proj = [(p[0], p[1]) for p in (_cam(x, y) for x, y in pts)]
+    ax.add_patch(Polygon(proj, closed=True, **kw))
+
+
+def _cam_pitch(ax: Axes) -> None:
+    """Perspective pitch with mowing stripes — the virtual tactical camera."""
+    for i in range(10):  # stripes along the length
+        x0, x1 = i * 10.5, (i + 1) * 10.5
+        _cam_poly(ax, [(x0, 0), (x1, 0), (x1, 68), (x0, 68)],
+                  facecolor="#41804D" if i % 2 else "#4A8C57",
+                  edgecolor="none", zorder=0)
+    w = dict(color=WHITE, lw=1.0, alpha=0.9, zorder=1)
+    _cam_line(ax, [(0, 0), (105, 0), (105, 68), (0, 68), (0, 0)], **w)
+    _cam_line(ax, [(52.5, 0), (52.5, 68)], **w)
+    for x0 in (0, 105):  # penalty areas
+        d = 16.5 if x0 == 0 else -16.5
+        _cam_line(ax, [(x0, 13.85), (x0 + d, 13.85), (x0 + d, 54.15),
+                       (x0, 54.15)], **w)
+    circle = [(52.5 + 9.15 * np.cos(a), 34 + 9.15 * np.sin(a))
+              for a in np.linspace(0, 2 * np.pi, 60)]
+    _cam_line(ax, circle, **w)
+    ax.set_xlim(0.01, 0.99)
+    ax.set_ylim(0.0, 0.92)
+    ax.axis("off")
+
+
+def _cam_ring(ax: Axes, x: float, y: float, color: str = "#FFD34D") -> None:
+    sx, sy, sc = _cam(x, y)
+    ax.add_patch(Ellipse((sx, sy - 0.004), 0.085 * sc, 0.03 * sc, fill=False,
+                         edgecolor=color, lw=2.2, zorder=3))
+
+
+def _cam_player(ax: Axes, x: float, y: float, color: str, label: str = "",
+                num: str = "") -> None:
+    sx, sy, sc = _cam(x, y)
+    ax.add_patch(Ellipse((sx, sy - 0.006), 0.05 * sc, 0.016 * sc,
+                         facecolor="black", alpha=0.25, edgecolor="none",
+                         zorder=2))
+    ax.scatter(sx, sy + 0.014 * sc, s=210 * sc ** 2, color=color,
+               edgecolor=WHITE, lw=1.1, zorder=4)
+    if num:
+        ax.text(sx, sy + 0.014 * sc, num, ha="center", va="center",
+                fontsize=4.4 + 2.2 * sc, color=WHITE, fontweight="bold",
+                zorder=5)
+    if label:
+        ax.text(sx, sy + 0.045 * sc, label, ha="center",
+                fontsize=4 + 2.4 * sc, color=WHITE, fontweight="bold",
+                zorder=5)
+
+
+def _cam_arrow(ax: Axes, p1: tuple[float, float], p2: tuple[float, float],
+               color: str = "#FFD34D", rad: float = 0.0) -> None:
+    a, b = _cam(*p1), _cam(*p2)
+    ax.annotate("", xy=(b[0], b[1]), xytext=(a[0], a[1]), zorder=5,
+                arrowprops=dict(arrowstyle="->", color=color, lw=2,
+                                connectionstyle=f"arc3,rad={rad}"))
+
+
+def _cam_tag(ax: Axes, text: str) -> None:
+    ax.add_patch(Rectangle((0.015, 0.855), 0.019 * len(text) + 0.02, 0.055,
+                           facecolor=NAVY, edgecolor=GOLD, lw=0.8, zorder=6))
+    ax.text(0.028, 0.882, text, fontsize=6.6, color=WHITE, zorder=7,
+            va="center", fontweight="bold")
+
+
+SPAIN_NUMS = {"Simon": "23", "Porro": "2", "Cubarsi": "5", "Laporte": "14",
+              "Cucurella": "24", "Rodri": "16", "F. Ruiz": "8", "Yamal": "19",
+              "Olmo": "10", "Baena": "15", "Oyarzabal": "21"}
+
+
+def cam_build(ax: Axes) -> None:
+    """Tactical camera: the 3-2-5 build, left overload shaded."""
+    _cam_pitch(ax)
+    _cam_poly(ax, [(55, 44), (88, 44), (88, 68), (55, 68)],
+              facecolor=SPAIN_RED, alpha=0.16, edgecolor=SPAIN_RED, lw=0.8,
+              ls="--", zorder=1)
+    for (x, y) in [(58, 22), (60, 34), (58, 46), (62, 56), (70, 28), (70, 40)]:
+        _cam_player(ax, x, y, "#7C838D")
+    spain = {"Simon": (6, 34), "Laporte": (22, 44), "Cubarsi": (22, 24),
+             "Porro": (30, 12), "Rodri": (42, 30), "F. Ruiz": (42, 44),
+             "Yamal": (70, 8), "Olmo": (64, 30), "Oyarzabal": (80, 34),
+             "Baena": (70, 54), "Cucurella": (62, 62)}
+    for name, (x, y) in spain.items():
+        _cam_player(ax, x, y, SPAIN_RED, label=name, num=SPAIN_NUMS[name])
+    _cam_ring(ax, 62, 62)
+    _cam_arrow(ax, (44, 58), (60, 62), rad=-0.15)
+    _cam_tag(ax, "IN POSSESSION · 3-2-5 BUILD")
+
+
+def cam_press(ax: Axes) -> None:
+    """Tactical camera: the curve press steering play into the trap."""
+    _cam_pitch(ax)
+    _cam_poly(ax, [(84, 46), (105, 46), (105, 68), (84, 68)],
+              facecolor="#FFD34D", alpha=0.22, edgecolor="#C9A227", lw=0.9,
+              ls="--", zorder=1)
+    opp = {"GK": (100, 34), "CB": (92, 22), "CB2": (92, 46), "LB": (86, 8),
+           "RB": (87, 60), "DM": (83, 30), "DM2": (83, 42)}
+    for _, (x, y) in opp.items():
+        _cam_player(ax, x, y, "#7C838D")
+    spain = {"Oyarzabal": (92, 32), "Olmo": (86, 38), "Yamal": (81, 54),
+             "Baena": (79, 14), "F. Ruiz": (74, 26), "Rodri": (74, 40),
+             "Porro": (70, 58), "Cucurella": (68, 10)}
+    for name, (x, y) in spain.items():
+        _cam_player(ax, x, y, SPAIN_RED, label=name, num=SPAIN_NUMS[name])
+    _cam_arrow(ax, (92, 32), (98, 28), rad=0.35)      # 9 curves the run
+    _cam_arrow(ax, (86, 38), (84, 43))                # 10 jumps the pivot
+    _cam_arrow(ax, (81, 54), (86, 59))                # winger springs trap
+    _cam_ring(ax, 87, 60)
+    _cam_tag(ax, "OUT OF POSSESSION · THE TRAP")
+
+
+def cam_counter(ax: Axes) -> None:
+    """Tactical camera: the 5-second counter-press collapse."""
+    _cam_pitch(ax)
+    ring = [(62 + 13 * np.cos(a), 36 + 10 * np.sin(a))
+            for a in np.linspace(0, 2 * np.pi, 50)]
+    _cam_line(ax, ring, color="#FFD34D", lw=1.6, ls="--", zorder=2)
+    sx, sy, sc = _cam(62, 36)
+    ax.scatter(sx, sy + 0.012, s=240 * sc ** 2, marker="X", color="#7C838D",
+               edgecolor=WHITE, lw=1, zorder=4)
+    ax.text(sx, sy - 0.035, "ball lost", ha="center", fontsize=6,
+            color=WHITE, zorder=5, fontweight="bold")
+    chasers = {"Olmo": (52, 44), "Rodri": (55, 26), "Yamal": (73, 30),
+               "Baena": (70, 48)}
+    for name, (x, y) in chasers.items():
+        _cam_player(ax, x, y, SPAIN_RED, label=name, num=SPAIN_NUMS[name])
+        _cam_arrow(ax, (x, y), (x + (62 - x) * 0.6, y + (36 - y) * 0.6),
+                   color=SPAIN_RED)
+    _cam_tag(ax, "TRANSITION · 5-SECOND COLLAPSE")
+
+
+# ------------------------------------------------------------------ the Final
+def final_shot_map(ax: Axes, shots: pd.DataFrame) -> None:
+    """Every shot of the Final: size = xG, star = the winner."""
+    draw_pitch_h(ax, face="#F1F4F8")
+    for _, s in shots.iterrows():
+        color = SPAIN_RED if s.team == "Spain" else GREY
+        if s.outcome == "goal":
+            ax.scatter(s.x, s.y, s=340, marker="*", color=GOLD,
+                       edgecolor=DARK, lw=0.8, zorder=6)
+            ax.annotate("F. Torres 106'", (s.x, s.y), xytext=(-64, 10),
+                        textcoords="offset points", fontsize=7.2,
+                        fontweight="bold", color=DARK,
+                        arrowprops=dict(arrowstyle="-", color=DARK, lw=0.7))
+        else:
+            filled = s.outcome == "on_target"
+            ax.scatter(s.x, s.y, s=60 + 900 * s.xg,
+                       facecolor=color if filled else "none",
+                       edgecolor=color, lw=1.2, alpha=0.85, zorder=5)
+    ax.text(80, 71, "SPAIN  20 shots · 2.4 xG", fontsize=7.6, color=SPAIN_RED,
+            fontweight="bold", ha="center")
+    ax.text(20, 71, "ARGENTINA  3 shots · 0.2 xG", fontsize=7.6, color=GREY,
+            fontweight="bold", ha="center")
+    ax.text(52.5, -6, "filled = on target  ·  size = est. xG", fontsize=6.6,
+            color=GREY, ha="center")
+    ax.set_ylim(-9, 75)
+
+
+def xg_race(ax: Axes, shots: pd.DataFrame) -> None:
+    """Cumulative xG through the 120 minutes of the Final."""
+    for team, color in [("Spain", SPAIN_RED), ("Argentina", GREY)]:
+        t = shots[shots.team == team].sort_values("minute")
+        m = [0] + list(t.minute) + [120]
+        v = [0] + list(t.xg.cumsum()) + [t.xg.sum()]
+        ax.step(m, v, where="post", color=color, lw=2.2, label=team)
+    ax.axvline(93, color=NAVY, lw=1, ls=":")
+    ax.text(92, 2.05, "Enzo Fernandez\nsent off 90+3", fontsize=6.6,
+            color=NAVY, ha="right", linespacing=1.3)
+    ax.axvline(106, color=GOLD, lw=1.2, ls="--")
+    ax.text(104, 1.45, "GOAL\nTorres 106'", fontsize=6.8, color="#9A7B14",
+            fontweight="bold", linespacing=1.3, ha="right")
+    ax.axvspan(90, 120, color=LIGHT_GREY, alpha=0.35, zorder=0)
+    ax.text(105, 0.06, "extra time", fontsize=6.4, color=GREY, ha="center")
+    ax.set_xlim(0, 121)
+    ax.set_ylim(0, 2.6)
+    ax.set_xticks([0, 15, 30, 45, 60, 75, 90, 105, 120])
+    ax.set_xlabel("Minute", fontsize=8)
+    ax.set_ylabel("Cumulative xG (est.)", fontsize=8)
+    ax.grid(axis="y", color=LIGHT_GREY, lw=0.8)
+    ax.legend(frameon=False, fontsize=8, loc="upper left")
+
+
+def shots_by_window(ax: Axes, shots: pd.DataFrame) -> None:
+    """Shot volume in 15-minute windows — relentless pressure."""
+    bins = np.arange(0, 135, 15)
+    labels = ["0-15", "15-30", "30-45", "45-60", "60-75", "75-90", "ET1", "ET2"]
+    x = np.arange(len(labels))
+    for team, color, off in [("Spain", SPAIN_RED, -0.2),
+                             ("Argentina", GREY, 0.2)]:
+        counts, _ = np.histogram(shots[shots.team == team].minute, bins=bins)
+        ax.bar(x + off, counts, width=0.38, color=color, label=team)
+        for xi, c in zip(x + off, counts):
+            if c:
+                ax.text(xi, c + 0.12, str(c), ha="center", fontsize=7,
+                        color=color)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=7)
+    ax.set_ylim(0, 5.4)
+    ax.set_ylabel("Shots", fontsize=8)
+    ax.legend(frameon=False, fontsize=8, loc="upper left")
+
+
+# ------------------------------------------------------------------ context
+def champions_ga(ax: Axes, hist: pd.DataFrame) -> None:
+    """Goals conceded by every World Cup winner, 2006-2026."""
+    labels = [f"{r.champion}\n{r.year} · {r.matches} gms"
+              for _, r in hist.iterrows()]
+    colors = [SPAIN_RED if r.year == 2026 else LIGHT_GREY
+              for _, r in hist.iterrows()]
+    edges = ["none" if c == SPAIN_RED else GREY for c in colors]
+    bars = ax.bar(labels, hist.goals_conceded, color=colors, edgecolor=edges,
+                  lw=0.6, width=0.62)
+    for b, (_, r) in zip(bars, hist.iterrows()):
+        ax.text(b.get_x() + b.get_width() / 2, r.goals_conceded + 0.15,
+                f"{r.goals_conceded}", ha="center", fontsize=9,
+                fontweight="bold" if r.year == 2026 else "normal",
+                color=SPAIN_RED if r.year == 2026 else GREY)
+    ax.set_ylim(0, 9.4)
+    ax.tick_params(axis="x", labelsize=7.4)
+    ax.set_ylabel("Goals conceded", fontsize=8)
+    ax.grid(axis="y", color=LIGHT_GREY, lw=0.8)
+
+
+def age_minutes(ax: Axes, players: pd.DataFrame) -> None:
+    """Squad structure: age vs minutes — a champion built on two generations."""
+    for _, p in players.iterrows():
+        young = p.age <= 24
+        color = GOLD if p.age <= 19 else (SPAIN_RED if young else GREY)
+        ax.scatter(p.age, p.minutes, s=90 if young else 55, color=color,
+                   edgecolor=WHITE, lw=1, zorder=3)
+        if p.minutes >= 640 or p.age <= 19 or p.player in ("Pedri", "Lamine Yamal"):
+            ax.annotate(p.player.split()[-1], (p.age, p.minutes),
+                        xytext=(0, 7), textcoords="offset points",
+                        ha="center", fontsize=6.6, color=NAVY)
+    ax.axvspan(17.5, 24.5, color=GOLD, alpha=0.08, zorder=0)
+    ax.text(21, 90, "the new wave", fontsize=7, color="#9A7B14",
+            ha="center", fontweight="bold")
+    ax.set_xlabel("Age at the Final", fontsize=8)
+    ax.set_ylabel("Minutes (est.)", fontsize=8)
+    ax.grid(color=LIGHT_GREY, lw=0.8)
+    ax.set_xlim(17.5, 33.5)
+    ax.set_ylim(0, 830)
 
 
 # ------------------------------------------------------------------ england
