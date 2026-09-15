@@ -66,16 +66,26 @@ def main() -> None:
         return
 
     # designed cover replaces the generated title page
-    from pypdf import PdfReader, PdfWriter
+    from pypdf import PdfReader, PdfWriter, Transformation
 
     body = OUTPUT_DIR / "_body.pdf"
     render_pages(PAGES[1:], data, body)
 
     writer = PdfWriter()
     cover_page = PdfReader(COVER).pages[0]
-    if cover_page.mediabox.width < cover_page.mediabox.height:
-        cover_page.rotate(90)  # portrait canvas holding landscape artwork
-    writer.add_page(cover_page)
+    pw, ph = float(cover_page.mediabox.width), float(cover_page.mediabox.height)
+    target_w, target_h = 960.0, 540.0   # 13.33in x 7.5in — the report page size
+    target = writer.add_blank_page(width=target_w, height=target_h)
+    if pw < ph:
+        # portrait canvas holding rotated 16:9 artwork, centred with white
+        # bars: rotate it upright, scale to full width, crop the bars away
+        s = target_w / ph
+        overflow = (pw * s - target_h) / 2
+        t = (Transformation().rotate(-90).translate(0, pw)
+             .scale(s).translate(0, -overflow))
+    else:
+        t = Transformation().scale(target_w / pw, target_h / ph)
+    target.merge_transformed_page(cover_page, t)
     for page in PdfReader(body).pages:
         writer.add_page(page)
     writer.add_metadata({"/Title": TITLE, "/Author": AUTHOR,
