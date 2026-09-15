@@ -64,32 +64,5 @@ touches.to_csv(DATA / "touch_points.csv", index=False)
 print(f"wrote {len(touches)} touches -> data/touch_points.csv "
       f"({len(TOUCH_MODEL)} players)")
 
-# ----------------------------------------------------------------- the Final
-# Shot-by-shot layer for the Final consistent with the reported aggregates:
-# Spain 20 shots / 8 on target / ~2.4 xG, F. Torres goal 106'; Argentina
-# 3 shots / 1 on target / ~0.2 xG. Spain attacks left->right (x high).
-shot_rows = []
-esp_minutes = sorted(rng.choice(np.arange(4, 120), size=19, replace=False))
-esp_on_target = set(rng.choice(19, size=7, replace=False))
-for i, m in enumerate(esp_minutes):
-    x = np.clip(rng.normal(93, 6), 78, 104)
-    y = np.clip(rng.normal(34, 9), 12, 56)
-    dist = np.hypot(105 - x, 34 - y)
-    xg = float(np.clip(0.32 * np.exp(-dist / 9) + rng.uniform(0.01, 0.05),
-                       0.02, 0.45))
-    out = "on_target" if i in esp_on_target else \
-        rng.choice(["off_target", "blocked"], p=[0.6, 0.4])
-    shot_rows.append(("Spain", int(m), round(x, 1), round(y, 1),
-                      round(xg, 2), out))
-shot_rows.append(("Spain", 106, 96.5, 37.0, 0.31, "goal"))
-for m, out in [(38, "off_target"), (57, "on_target"), (78, "off_target")]:
-    x = np.clip(rng.normal(14, 5), 4, 25)
-    y = np.clip(rng.normal(34, 8), 18, 50)
-    shot_rows.append(("Argentina", m, round(x, 1), round(y, 1),
-                      round(float(rng.uniform(0.04, 0.09)), 2), out))
-
-shots_df = pd.DataFrame(shot_rows,
-                        columns=["team", "minute", "x", "y", "xg", "outcome"])
-shots_df.to_csv(DATA / "final_shots.csv", index=False)
-print(f"wrote {len(shots_df)} shots -> data/final_shots.csv "
-      f"(Spain xG {shots_df[shots_df.team == 'Spain'].xg.sum():.2f})")
+# NOTE: data/final_shots.csv is REAL provider data (FotMob shotmap) written by
+# scripts/fetch_fotmob.py — it is deliberately not generated here.

@@ -86,17 +86,24 @@ The PDF is written to `output/spain_wc2026_report.pdf`.
 
 ## Data provenance
 
-- **Verified facts** (results, scorers, route, awards, final shot counts, the Final XI)
-  are compiled from public reporting: [FIFA](https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/final),
+- **Real provider data (FotMob, Opta-based)** — fetched by `scripts/fetch_fotmob.py`
+  from FotMob's public API, with every raw JSON response cached in `data/fotmob/`
+  so the numbers are auditable:
+  - per-match **xG for/against, possession, shots, shots on target** (`matches.csv`)
+  - the Final's **complete shotmap** — real coordinates, per-shot xG, outcomes
+    (`final_shots.csv`)
+  - real **minutes, goals, assists and ages** for all 16 used players (`players.csv`)
+  - real **goal events** (scorers and minutes, including the Saudi own goal)
+- **Verified editorial facts** (route, awards, Final XI, red card) from
+  [FIFA](https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/final),
   [ESPN](https://www.espn.com/soccer/match/_/gameId/760517/argentina-spain),
-  [CBS News](https://www.cbsnews.com/news/2026-fifa-world-cup-final-spain-argentina-sunday/),
-  [Striker Report](https://strikerreport.com/every-spain-match-fifa-world-cup-2026-results/),
-  [Sports Illustrated — confirmed Final lineups](https://www.si.com/soccer/spain-vs-argentina-confirmed-lineups-2026-world-cup-final) and
-  [Yahoo Sports — individual awards](https://sports.yahoo.com/articles/no-yamal-golden-ball-boot-225800390.html).
-- **Advanced metrics** (per-match xG, possession shares, minutes, percentile profiles)
-  are *estimates* reconstructed from public match reports, clearly labelled "(est.)"
-  in the report. The pipeline is data-source-agnostic: swap the CSVs for provider data
-  (Opta, StatsBomb, FBref) and rebuild.
+  [Sports Illustrated](https://www.si.com/soccer/spain-vs-argentina-confirmed-lineups-2026-world-cup-final) and
+  [Yahoo Sports](https://sports.yahoo.com/articles/no-yamal-golden-ball-boot-225800390.html).
+- **Modelled layers, clearly labelled as such in the report** — data that no public
+  source provides (tracking-derived): player touch heatmaps, pressing zones, high-regain
+  locations, line heights, pass-network volumes, PPDA, rivals' xG totals, and England's
+  xG. These are produced by the seeded generator in `scripts/` and are kept only where
+  provider data does not exist; each carries an "(est.)" or "modelled" caption.
 
 ## Designed cover
 

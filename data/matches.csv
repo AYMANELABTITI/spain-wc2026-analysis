@@ -1,9 +1,9 @@
 match_no,stage,opponent,date,venue,gf,ga,xg_for,xg_against,possession,shots,shots_on_target,scorers
-1,Group C,Cape Verde,2026-06-15,Atlanta,0,0,2.1,0.3,74,18,5,
-2,Group C,Saudi Arabia,2026-06-21,Atlanta,4,0,3.2,0.4,71,22,11,"Oyarzabal (2), Yamal, Porro"
-3,Group C,Uruguay,2026-06-27,Guadalajara,1,0,1.6,0.8,63,14,6,Baena
-4,Round of 32,Austria,2026-07-02,Los Angeles,3,0,2.5,0.6,66,17,9,"Oyarzabal (2), Merino"
-5,Round of 16,Portugal,2026-07-06,Dallas,1,0,1.4,0.9,58,12,5,Spain goal (unattributed)
-6,Quarter-final,Belgium,2026-07-10,Los Angeles,2,1,2.2,1.1,64,16,7,"Merino, Spain goal (unattributed)"
-7,Semi-final,France,2026-07-14,Dallas,2,0,1.9,0.7,55,13,6,"Oyarzabal (pen), Porro"
-8,Final,Argentina,2026-07-19,New Jersey,1,0,2.4,0.2,68,20,8,F. Torres 106'
+1,Group C,Cape Verde,2026-06-15,Atlanta,0,0,2.1,0.2,74,27,7,
+2,Group C,Saudi Arabia,2026-06-21,Atlanta,4,0,2.3,0.14,67,22,8,"Yamal, Oyarzabal (2), Al Tambakti (og)"
+3,Group C,Uruguay,2026-06-27,Guadalajara,1,0,0.86,0.2,67,6,1,Baena 42'
+4,Round of 32,Austria,2026-07-02,Los Angeles,3,0,2.8,0.32,64,23,10,"Oyarzabal (2), Porro"
+5,Round of 16,Portugal,2026-07-06,Dallas,1,0,1.69,0.63,55,15,6,Merino 90'
+6,Quarter-final,Belgium,2026-07-10,Los Angeles,2,1,1.96,0.34,68,17,8,"F. Ruiz, Merino 88'"
+7,Semi-final,France,2026-07-14,Dallas,2,0,1.63,0.31,51,10,2,"Oyarzabal (pen), Porro"
+8,Final,Argentina,2026-07-19,New Jersey,1,0,2.29,0.22,65,20,12,F. Torres 106'

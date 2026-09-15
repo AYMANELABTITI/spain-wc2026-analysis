@@ -1,24 +1,23 @@
-team,minute,x,y,xg,outcome
-Spain,6,96.5,16.7,0.08,off_target
-Spain,12,104.0,21.0,0.12,off_target
-Spain,16,91.0,43.6,0.08,off_target
-Spain,20,88.1,19.4,0.06,blocked
-Spain,25,94.0,42.4,0.1,blocked
-Spain,35,97.7,25.7,0.13,off_target
-Spain,36,79.5,17.5,0.04,on_target
-Spain,38,97.5,38.9,0.16,on_target
-Spain,41,90.9,40.5,0.07,off_target
-Spain,45,88.3,25.4,0.09,off_target
-Spain,53,98.0,46.7,0.09,on_target
-Spain,55,82.2,36.4,0.08,on_target
-Spain,62,82.0,34.9,0.04,on_target
-Spain,86,100.2,47.3,0.09,off_target
-Spain,100,103.8,36.8,0.26,off_target
-Spain,104,90.5,40.0,0.1,blocked
-Spain,106,96.1,43.9,0.1,on_target
-Spain,117,98.2,38.6,0.14,on_target
-Spain,118,94.2,44.4,0.08,off_target
-Spain,106,96.5,37.0,0.31,goal
-Argentina,38,17.3,22.6,0.05,off_target
-Argentina,57,15.2,47.6,0.07,on_target
-Argentina,78,21.4,38.3,0.05,off_target
+team,minute,x,y,xg,outcome,player
+Spain,5,98.9,21.7,0.1,on_target,Lamine Yamal
+Spain,39,86.5,30.9,0.062,on_target,Mikel Oyarzabal
+Spain,43,85.3,51.0,0.029,off_target,Marc Cucurella
+Spain,46,85.3,41.2,0.077,on_target,Álex Baena
+Spain,61,81.2,17.6,0.035,on_target,Lamine Yamal
+Spain,64,80.5,32.4,0.046,on_target,Dani Olmo
+Spain,65,100.1,31.4,0.142,on_target,Dani Olmo
+Spain,67,97.3,30.3,0.264,on_target,Ferran Torres
+Spain,77,87.2,36.7,0.045,on_target,Pedri
+Spain,77,83.6,18.7,0.029,on_target,Pau Cubarsí
+Spain,81,98.6,37.7,0.093,on_target,Aymeric Laporte
+Spain,87,93.8,26.8,0.16,off_target,Ferran Torres
+Spain,89,76.1,30.3,0.034,off_target,Rodri
+Spain,90,89.7,19.7,0.055,on_target,Nico Williams
+Spain,90,80.8,36.3,0.075,on_target,Lamine Yamal
+Spain,93,97.8,34.8,0.476,on_target,Nico Williams
+Spain,101,83.2,21.7,0.017,off_target,Lamine Yamal
+Spain,103,97.9,34.5,0.255,off_target,Mikel Merino
+Spain,104,78.3,38.6,0.035,on_target,Nico Williams
+Spain,106,96.6,38.1,0.255,goal,Ferran Torres
+Argentina,117,19.7,46.5,0.027,on_target,Lionel Messi
+Argentina,120,8.8,35.8,0.196,off_target,Giuliano Simeone

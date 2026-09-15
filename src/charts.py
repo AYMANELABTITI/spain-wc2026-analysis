@@ -99,7 +99,7 @@ def xg_vs_goals(ax: Axes, matches: pd.DataFrame) -> None:
     x = matches.match_no
     w = 0.38
     ax.bar(x - w / 2, matches.xg_for, width=w, color=LIGHT_GREY,
-           edgecolor=GREY, lw=0.6, label="xG created (est.)")
+           edgecolor=GREY, lw=0.6, label="xG created (FotMob)")
     ax.bar(x + w / 2, matches.gf, width=w, color=SPAIN_RED, label="Goals")
     ax.set_xticks(x)
     ax.set_xticklabels([STAGE_SHORT[s] for s in matches.stage], fontsize=7.5)
@@ -126,15 +126,15 @@ def scorer_spread(ax: Axes, players: pd.DataFrame) -> None:
 def xga_timeline(ax: Axes, matches: pd.DataFrame) -> None:
     x = matches.match_no
     ax.plot(x, matches.xg_against, color=GREY, lw=2, marker="o", ms=5,
-            label="xG conceded (est.)")
+            label="xG conceded")
     ax.scatter(x, matches.ga, color=SPAIN_RED, s=70, zorder=3,
                label="Goals conceded")
-    ax.annotate("only breach:\nBelgium (QF)", (6, 1), xytext=(4.15, 1.28),
+    ax.annotate("only breach:\nBelgium (QF)", (6, 1), xytext=(3.6, 1.02),
                 fontsize=8, color=DEEP_RED,
                 arrowprops=dict(arrowstyle="-", color=DEEP_RED, lw=0.8))
     ax.set_xticks(x)
     ax.set_xticklabels([STAGE_SHORT[s] for s in matches.stage], fontsize=7.5)
-    ax.set_ylim(-0.1, 1.75)
+    ax.set_ylim(-0.07, 1.3)
     ax.grid(axis="y", color=LIGHT_GREY, lw=0.8)
     ax.legend(frameon=False, fontsize=8, loc="upper left")
 
@@ -156,18 +156,17 @@ def conceded_ranking(ax: Axes, teams: pd.DataFrame) -> None:
 
 
 def final_dominance(ax: Axes) -> None:
-    """The final in one picture: 20-3 shots, 8-1 on target."""
-    cats = ["Shots", "Shots on\ntarget", "xG (est.)"]
-    spain = [20, 8, 2.4]
-    argentina = [3, 1, 0.2]
+    """The final in one picture: 20-2 shots, 12-0 on target (FotMob)."""
+    cats = ["Shots", "Shots on\ntarget", "xG"]
+    rows = [(20, 2, "20", "2"), (12, 0.35, "12", "0"), (2.29, 0.22, "2.29", "0.22")]
     y = np.arange(len(cats))[::-1]
-    for yi, s, a in zip(y, spain, argentina):
+    for yi, (s, a, sl, al) in zip(y, rows):
         total = s + a
         ax.barh(yi, s / total, color=SPAIN_RED, height=0.52)
         ax.barh(yi, a / total, left=s / total, color=GREY, height=0.52)
-        ax.text(0.02, yi, f"{s}", va="center", color=WHITE, fontsize=10,
+        ax.text(0.02, yi, sl, va="center", color=WHITE, fontsize=10,
                 fontweight="bold")
-        ax.text(0.98, yi, f"{a}", va="center", ha="right", color=WHITE,
+        ax.text(0.98, yi, al, va="center", ha="right", color=WHITE,
                 fontsize=10, fontweight="bold")
     ax.set_yticks(y)
     ax.set_yticklabels(cats, fontsize=8.5)
@@ -744,12 +743,12 @@ def final_shot_map(ax: Axes, shots: pd.DataFrame) -> None:
             ax.scatter(s.x, s.y, s=60 + 900 * s.xg,
                        facecolor=color if filled else "none",
                        edgecolor=color, lw=1.2, alpha=0.85, zorder=5)
-    ax.text(80, 71, "SPAIN  20 shots · 2.4 xG", fontsize=7.6, color=SPAIN_RED,
-            fontweight="bold", ha="center")
-    ax.text(20, 71, "ARGENTINA  3 shots · 0.2 xG", fontsize=7.6, color=GREY,
-            fontweight="bold", ha="center")
-    ax.text(52.5, -6, "filled = on target  ·  size = est. xG", fontsize=6.6,
-            color=GREY, ha="center")
+    for team, color, xpos in [("Spain", SPAIN_RED, 80), ("Argentina", GREY, 20)]:
+        t = shots[shots.team == team]
+        ax.text(xpos, 71, f"{team.upper()}  {len(t)} shots · {t.xg.sum():.2f} xG",
+                fontsize=7.6, color=color, fontweight="bold", ha="center")
+    ax.text(52.5, -6, "filled = on target  ·  size = xG  ·  Source: FotMob shotmap",
+            fontsize=6.6, color=GREY, ha="center")
     ax.set_ylim(-9, 75)
 
 
@@ -772,7 +771,7 @@ def xg_race(ax: Axes, shots: pd.DataFrame) -> None:
     ax.set_ylim(0, 2.6)
     ax.set_xticks([0, 15, 30, 45, 60, 75, 90, 105, 120])
     ax.set_xlabel("Minute", fontsize=8)
-    ax.set_ylabel("Cumulative xG (est.)", fontsize=8)
+    ax.set_ylabel("Cumulative xG (FotMob)", fontsize=8)
     ax.grid(axis="y", color=LIGHT_GREY, lw=0.8)
     ax.legend(frameon=False, fontsize=8, loc="upper left")
 
@@ -792,7 +791,7 @@ def shots_by_window(ax: Axes, shots: pd.DataFrame) -> None:
                         color=color)
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=7)
-    ax.set_ylim(0, 5.4)
+    ax.set_ylim(0, 7.2)
     ax.set_ylabel("Shots", fontsize=8)
     ax.legend(frameon=False, fontsize=8, loc="upper left")
 
